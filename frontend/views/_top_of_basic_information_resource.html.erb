@@ -1,0 +1,11 @@
+<% unless current_repo.nil? || @resource.nil? %>
+<script>
+  const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`);
+  <% if @resource['custom_restriction'] %>
+    <% custom_restriction = @resource['custom_restriction'] %>
+    custom_restriction.displayRestriction('<%= I18n.t('enumerations.custom_restriction_type.' + custom_restriction['custom_restriction_type'], custom_restriction['custom_restriction_type']) %>');
+  <% elsif @resource['restrictions'] == true %>
+    custom_restriction.displayRestriction('<%= I18n.t('custom_restriction.custom_restriction_default') %>');
+  <% end %>
+</script>
+<% end %>

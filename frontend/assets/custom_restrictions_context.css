@@ -1,0 +1,89 @@
+#custom-restriction {
+  margin-left: 1rem;
+  letter-spacing: 0.3px;
+}
+#custom-restriction::before {
+  margin-right: 4px;
+  content: "\e002";
+  vertical-align: text-bottom;
+  font-family: "Material Symbols Outlined";
+  font-variation-settings: "FILL" 1;
+}
+#custom-restriction-mini-tree-loader {
+  margin-left: 0;
+  font-size: 1.25rem;
+  border: none;
+}
+#custom-restriction-mini-tree-loader::after {
+  content: "\e5cf";
+  vertical-align: text-bottom;
+  font-family: "Material Symbols Outlined";
+  font-variation-settings: "FILL" 1;
+}
+#custom-restriction-mini-tree-loader[aria-expanded="true"]::after {
+  content: "\e5ce";
+}
+#custom-restrictions-mini-tree {
+  margin-top: 1rem;
+  margin-left: 1rem;
+  font-size: 1.5rem;
+}
+span[class*="mini-tree-level-"] {
+  display: block;
+}
+span[class*="mini-tree-level-"]::before {
+  content: "\e5da";
+  vertical-align: text-bottom;
+  font-family: "Material Symbols Outlined";
+  font-variation-settings: "FILL" 1;
+}
+span.mini-tree-level-0::before {
+  content: "\e8de";
+}
+.mini-tree-level-1 {
+  margin-left: 1.25rem;
+}
+.mini-tree-level-2 {
+  margin-left: 2.5rem;
+}
+.mini-tree-level-3 {
+  margin-left: 3.75rem;
+}
+.mini-tree-level-4 {
+  margin-left: 5rem;
+}
+.mini-tree-level-5 {
+  margin-left: 6.25rem;
+}
+.mini-tree-leveltype {
+  font-weight: 200;
+}
+#mini-tree-locations-and-indicators {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ccc;
+}
+.mini-tree-location {
+  display: grid;
+  grid-template-columns: min-content 1fr;
+  gap: 1rem;
+}
+.mini-tree-location::before {
+  content: "\e0c8";
+  font-family: "Material Symbols Outlined";
+  font-variation-settings: "FILL" 1;
+  font-size: 2rem;
+}
+
+/* Search */
+
+/* don't display the context */
+#tabledSearchResults #mini-tree-context {
+  display: none;
+}
+
+#tabledSearchResults #mini-tree-locations-and-indicators {
+  margin-top: 0;
+  padding: 4px;
+  border: none;
+}

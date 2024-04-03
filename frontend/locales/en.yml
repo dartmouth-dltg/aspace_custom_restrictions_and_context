@@ -1,0 +1,23 @@
+en:
+  plugins:
+    aspace_custom_restrictions_and_context:
+      _plural: Custom Restrictions
+      _singular: Custom Restriction
+    custom_restriction:
+      _plural: Custom Restrictions
+      _singular: Custom Restriction
+      _frontend:
+        action:
+          add: Add Custom Restriction
+
+  custom_restriction:
+    custom_restriction_default: May be Restricted
+    custom_restriction_type: Custom Restriction Type
+    section_title: Custom Restriction
+
+  custom_restrictions_and_context:
+    mini_tree_action: Context & Location (if available)
+    restriction_label: "%{restriction} at the %{level} level"
+
+  enumeration_names:
+    custom_restriction_type: Custom Restriction Type

@@ -1,0 +1,6 @@
+<% unless current_repo.nil? || @archival_object.nil? %>
+<script>
+  const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`);
+  custom_restriction.displayMiniTreeLoader('<%= @archival_object.id %>');
+</script>
+<% end %>

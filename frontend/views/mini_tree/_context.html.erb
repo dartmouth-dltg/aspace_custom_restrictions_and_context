@@ -1,0 +1,43 @@
+<% unless @restrictions.blank? %>
+  <% @restrictions.each do |level, restriction| %>
+    <div id="custom-restriction" class="label label-danger">
+      <%= 
+        I18n.t('custom_restrictions_and_context.restriction_label', 
+          {
+            :level => level.titleize,
+            :restriction => I18n.t('enumerations.custom_restriction_type.' + restriction, I18n.t('enumerations.custom_restriction_type.default'))
+          }
+        )
+      %>
+    </div>
+    <% end %>
+<% end %>
+<% unless @tree.blank? && @location.blank? %>
+  <div id="custom-restrictions-mini-tree">
+    <% unless @tree.blank? %>
+      <div id="mini-tree-context">
+        <% @tree.each_with_index do |(level, title), idx| %>
+          <span class="mini-tree-level-<%= idx %>"><span class="mini-tree-leveltype"><%= level.capitalize %>: </span><%= title %></span>
+        <% end %>
+      </div>
+    <% end %>
+    <% unless @location.blank? %>
+      <div id="mini-tree-locations-and-indicators">
+        <% @location.each do |loc| %>
+          <div class="mini-tree-location">
+            <div>
+              <div class="mini-tree-indicator">
+                Location: <%= loc['type'].nil? ? 'Container' : loc['type'].capitalize %> <%= loc['indicator']%>
+              </div>
+              <div class="mini-tree-locations">
+                <% loc['locations'].each do |place| %>
+                <span class="mini-tree-location-place"><%= place %></span>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

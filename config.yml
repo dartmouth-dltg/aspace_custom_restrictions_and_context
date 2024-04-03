@@ -1,0 +1,14 @@
+no_automatic_routes: true
+parents:
+  accession:
+    name: custom_restriction
+    cardinality: zero_to_one
+  archival_object:
+    name: custom_restriction
+    cardinality: zero_to_one
+  resource:
+    name: custom_restriction
+    cardinality: zero_to_one
+  digital_object:
+    name: custom_restriction
+    cardinality: zero_to_one

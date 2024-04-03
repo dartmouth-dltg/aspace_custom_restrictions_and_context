@@ -1,0 +1,13 @@
+<%
+   section_id = "custom_restriction" if section_id.blank?
+%>
+<section id="<%= section_id %>" class="subrecord-form-dummy">
+  <h3><%= I18n.t("plugins.custom_restriction._plural") %></h3>
+  <%= readonly_context(:custom_restriction, custom_restriction) do |readonly| %>
+    <div class="subrecord-form-container">
+      <div class="subrecord-form-fields">
+        <%= readonly.label_with_field "custom_restriction_type", ('custom_restriction_type' && I18n.t('enumerations.custom_restriction_type.' + custom_restriction['custom_restriction_type'], custom_restriction['custom_restriction_type'])) %>
+      </div>
+    </div>
+  <% end %>
+</section>

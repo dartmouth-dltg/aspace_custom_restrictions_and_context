@@ -1,0 +1,89 @@
+class CustomRestrictionsPuiController < ApplicationController
+
+  skip_before_action  :verify_authenticity_token
+
+  def custom_pui_restrictions
+    record_type = params[:type]
+    uri = params[:uri]
+
+    allowed_types = [
+      'accessions',
+      'archival_objects',
+      'digital_objects',
+      'resources'
+    ]
+    resolve = ['ancestors:id']
+
+    if allowed_types.include?(record_type)
+
+      begin
+        record = ArchivesSpaceClient.instance.get_record(uri, 'resolve[]' => resolve)
+      rescue
+        record = false
+      end
+
+      if record
+
+        case record_type
+        when 'accessions'
+          restrictions = toplevel_restriction(record.raw)
+        when 'archival_objects'
+          restrictions = get_restrictions(record.raw)
+        when 'digital_objects'
+          restrictions = toplevel_restriction(record.raw)
+        when 'resources'
+          restrictions = toplevel_restriction(record.raw)
+        end
+        # restrictions is in form {level => restriction_type}
+        restriction_message = I18n.t('enumerations.custom_restriction_type.' + restrictions.values.first, I18n.t('enumerations.custom_restriction_type.default'))
+        render :json => ASUtils.to_json(restriction_message)
+
+      else
+        render :json => {}
+      end
+
+    else
+      render :json => {}
+    end
+  end
+
+  private
+
+  def is_restricted?(record)
+    restrictions = {}
+    level = record['level'] == 'otherlevel' ? record['other_level'] : record['level']
+
+    if level.nil?
+      level = record['jsonmodel_type'].gsub('_', ' ').capitalize
+    end
+
+    if record['custom_restriction'] && record['custom_restriction']['custom_restriction_type']
+      restrictions[level] = record['custom_restriction']['custom_restriction_type']
+    elsif record['restrictions_apply'] || record['restrictions']
+      restrictions[level] = 'default'
+    end
+
+    restrictions
+  end
+
+  def get_restrictions(record)
+    restrictions = is_restricted?(ASUtils.json_parse(record['json']))
+    if restrictions.empty?
+      if record['_resolved_ancestors'] && record['_resolved_ancestors'].length > 0
+        # uggghhh! resolved ancestors are stored as a hash....ugly
+        record['_resolved_ancestors'].to_a.reverse.to_h.each do |anc|
+          break if restrictions.length > 0 
+          # resolved ancestors are in form [uri, [record]]
+          restrictions = is_restricted?(ASUtils.json_parse(anc.last.first['json']))
+        end
+      end
+    end
+
+    restrictions
+  end
+
+  def toplevel_restriction(record)
+    is_restricted?(ASUtils.json_parse(record['json']))
+  end
+
+end

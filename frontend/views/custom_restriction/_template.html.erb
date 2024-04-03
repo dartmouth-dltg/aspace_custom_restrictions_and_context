@@ -1,0 +1,5 @@
+<% define_template "custom_restriction", jsonmodel_definition(:custom_restriction) do |form| %>
+  <div class="subrecord-form-fields">
+    <%= form.label_and_select('custom_restriction_type', form.possible_options_for('custom_restriction_type', true)) %>
+  </div>
+<% end %>

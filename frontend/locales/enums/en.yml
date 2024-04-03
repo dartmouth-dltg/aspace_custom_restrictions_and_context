@@ -1,0 +1,7 @@
+en:
+  enumerations:
+    custom_restriction_type:
+      access_restricted: Access Restricted
+      default: May Be Restricted
+      may_be_restricted: May Be Restricted
+      some_materials_restricted: Some Materials Restricted

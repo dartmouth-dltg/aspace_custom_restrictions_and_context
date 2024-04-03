@@ -1,0 +1,50 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<%= stylesheet_link_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.css" %>
+<%= javascript_include_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.js" %>
+
+<%
+  # there isn't any place to stick additional view logic in these, so we need to 
+  # go pure js to initialize
+
+  def search_page?
+    controller.controller_name == "search"
+  end
+
+  def is_resource_idx? 
+    controller.controller_name == "resources" && controller.action_name = "index"
+  end
+
+  def is_accession_idx? 
+    controller.controller_name == "accessions" && controller.action_name = "index"
+  end
+
+  def is_digital_object_idx? 
+    controller.controller_name == "digital_objects" && controller.action_name = "index"
+  end
+
+  def accession?
+    controller.controller_name == 'accessions'
+  end
+
+  def digital_object?
+    controller.controller_name == 'digital_objects'
+  end
+
+%>
+
+<% unless current_repo.nil? %>
+
+<script>
+  const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`);
+  $().ready(() => {
+    <% if search_page? || is_accession_idx? || is_digital_object_idx? || is_resource_idx? %>
+      objectDecorator.decorateSearchTypes();
+    <% elsif accession? %>
+      objectDecorator.setupDecorateObjectType('accessions');
+    <% elsif digital_object? %>
+      objectDecorator.setupDecorateObjectType('digital_objects');
+    <% end %>
+  });
+</script>
+
+<% end %>
