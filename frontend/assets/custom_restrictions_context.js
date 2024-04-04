@@ -62,8 +62,6 @@ class CustomRestrictionsAndContext {
 
     if (this.displayContext) {
       $(this.miniTreeLoaderSelector).attr('aria-expanded', 'true');
-    } else {
-
     }
   }
 

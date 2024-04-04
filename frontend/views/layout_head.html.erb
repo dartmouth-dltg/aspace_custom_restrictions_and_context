@@ -6,6 +6,11 @@
   # there isn't any place to stick additional view logic in these, so we need to 
   # go pure js to initialize
 
+  display_context = true
+  if AppConfig.has_key?(:aspace_custom_restrictions_show_context) && AppConfig[:aspace_custom_restrictions_show_context] == false 
+    display_context = false
+  end
+
   def search_page?
     controller.controller_name == "search"
   end
@@ -35,7 +40,7 @@
 <% unless current_repo.nil? %>
 
 <script>
-  const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`);
+  const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
   $().ready(() => {
     <% if search_page? || is_accession_idx? || is_digital_object_idx? || is_resource_idx? %>
       objectDecorator.decorateSearchTypes();

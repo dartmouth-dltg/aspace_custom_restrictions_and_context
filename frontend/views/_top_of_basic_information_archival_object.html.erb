@@ -1,10 +1,9 @@
 <% unless current_repo.nil? || @archival_object.nil? %>
   <% if controller.action_name == 'show' %>
     <% 
+      display_context = true
       if AppConfig.has_key?(:aspace_custom_restrictions_show_context) && AppConfig[:aspace_custom_restrictions_show_context] == false 
         display_context = false
-      else
-        display_context = true
       end
     %>
     <script>
