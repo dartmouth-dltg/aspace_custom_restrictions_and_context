@@ -68,7 +68,7 @@ class AspaceCustomRestrictionsContextHelper
     end
   end
 
-  def self.get_resource_location(record)
+  def self.get_location(record)
     indicator_and_location = nil
     if check_for_subcontainers(record['instances'])
       indicator_and_location = parse_containers(record['instances'])

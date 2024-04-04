@@ -10,6 +10,7 @@ class CustomRestrictionsPuiController < ApplicationController
       'accessions',
       'archival_objects',
       'digital_objects',
+      'digital_object_components',
       'resources'
     ]
     resolve = ['ancestors:id']
@@ -31,6 +32,8 @@ class CustomRestrictionsPuiController < ApplicationController
           restrictions = get_restrictions(record.raw)
         when 'digital_objects'
           restrictions = toplevel_restriction(record.raw)
+        when 'digital_object_components'
+          restrictions = get_restrictions(record.raw)
         when 'resources'
           restrictions = toplevel_restriction(record.raw)
         end

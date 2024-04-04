@@ -1,4 +1,4 @@
-<% unless current_repo.nil? || @resource.nil? %>
+<% unless current_repo.nil? || @accession.nil? %>
   <% if controller.action_name == 'show' %>
     <% 
       display_context = true
@@ -6,22 +6,22 @@
         display_context = false
       end
 
-      resource_location = AspaceCustomRestrictionsContextHelper.get_location(@resource)
+      accession_location = AspaceCustomRestrictionsContextHelper.get_location(@accession)
 
-      resource_restriction = AspaceCustomRestrictionsContextHelper.is_restricted?(@resource)
+      accession_restriction = AspaceCustomRestrictionsContextHelper.is_restricted?(@accession)
 
-      resource_data = render(:partial => 'mini_tree/context', :locals => {
-        :@restrictions => resource_restriction,
+      accession_data = render(:partial => 'mini_tree/context', :locals => {
+        :@restrictions => accession_restriction,
         :@tree => '',
-        :@location => resource_location
+        :@location => accession_location
       })
     %>
     <script>
-      $().ready(() => {
+    $().ready(() => {
         const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
         custom_restriction.displayMiniTreeLoader();
-        custom_restriction.addMiniTree(`<%= resource_data %>`);
-      });
+        custom_restriction.addMiniTree(`<%= accession_data %>`);
+    });
     </script>
   <% end %>
 <% end %>

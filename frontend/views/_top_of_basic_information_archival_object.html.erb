@@ -7,9 +7,11 @@
       end
     %>
     <script>
-      const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
-      custom_restriction.displayMiniTreeLoader();
-      custom_restriction.fetchObjectJson(`<%= @archival_object.id %>`);
+      $().ready(() => {
+        const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
+        custom_restriction.displayMiniTreeLoader();
+        custom_restriction.fetchObjectJson(`<%= @archival_object.id %>`, 'archival_objects');
+      });
     </script>
   <% end %>
 <% end %>

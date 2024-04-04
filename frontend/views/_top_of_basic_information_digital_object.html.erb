@@ -1,4 +1,4 @@
-<% unless current_repo.nil? || @resource.nil? %>
+<% unless current_repo.nil? || @digital_object.nil? %>
   <% if controller.action_name == 'show' %>
     <% 
       display_context = true
@@ -6,21 +6,19 @@
         display_context = false
       end
 
-      resource_location = AspaceCustomRestrictionsContextHelper.get_location(@resource)
+      digital_object_restriction = AspaceCustomRestrictionsContextHelper.is_restricted?(@digital_object)
 
-      resource_restriction = AspaceCustomRestrictionsContextHelper.is_restricted?(@resource)
-
-      resource_data = render(:partial => 'mini_tree/context', :locals => {
-        :@restrictions => resource_restriction,
+      digital_object_data = render(:partial => 'mini_tree/context', :locals => {
+        :@restrictions => digital_object_restriction,
         :@tree => '',
-        :@location => resource_location
+        :@location => {}
       })
     %>
     <script>
       $().ready(() => {
         const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
         custom_restriction.displayMiniTreeLoader();
-        custom_restriction.addMiniTree(`<%= resource_data %>`);
+        custom_restriction.addMiniTree(`<%= digital_object_data %>`);
       });
     </script>
   <% end %>

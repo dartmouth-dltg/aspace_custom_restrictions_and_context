@@ -1,6 +1,21 @@
+/* override core! */
+h2 > .label {
+  display: inline-block;
+  margin-top: 0;
+  margin-right: 1rem;
+  vertical-align: top;
+  font-size: 1.35rem;
+}
 #custom-restriction {
-  margin-left: 1rem;
+  display: inline-grid;
+  grid-template-columns: min-content fit-content(100%);
+  gap: 0.5rem;
+  max-width: 400px;
+  align-items: center;
+  white-space: wrap;
+  text-align: left;
   letter-spacing: 0.3px;
+  font-size: 1.35rem;
 }
 #custom-restriction::before {
   margin-right: 4px;
@@ -14,6 +29,9 @@
   font-size: 1.25rem;
   border: none;
 }
+#custom-restriction-mini-tree-loader[aria-expanded="true"] {
+  border-radius: 4px 4px 0 0;
+}
 #custom-restriction-mini-tree-loader::after {
   content: "\e5cf";
   vertical-align: text-bottom;
@@ -24,8 +42,9 @@
   content: "\e5ce";
 }
 #custom-restrictions-mini-tree {
-  margin-top: 1rem;
-  margin-left: 1rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0 4px 4px 4px;
   font-size: 1.5rem;
 }
 span[class*="mini-tree-level-"] {
@@ -89,4 +108,11 @@ span.mini-tree-level-0::before {
   margin-top: 0;
   padding: 4px;
   border: none;
+}
+
+#tabledSearchResults #custom-restrictions-mini-tree {
+  margin-top: 1rem;
+  padding: 0;
+  border: none;
+  font-size: 1.4rem;
 }

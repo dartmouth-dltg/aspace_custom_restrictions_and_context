@@ -9,7 +9,7 @@ class CustomRestrictionsAndContext {
     this.restrictionsId = '#custom-restriction';
     this.repo_id = repo_id;
     this.displayContext = displayContext;
-    this.objectTypes = ['accessions', 'archival_objects', 'digital_objects', 'resources'];
+    this.objectTypes = ['accessions', 'archival_objects', 'digital_objects', 'digital_object_components', 'resources'];
   }
 
   waitForEl(selector, callback) {
@@ -56,6 +56,9 @@ class CustomRestrictionsAndContext {
     }
     if (hasLocation === false) {
       $(this.miniTreeLoaderSelector).replaceWith(AS.renderTemplate("template_custom_restrictions_context_only"));
+    }
+    if (hasLocation === false && hasContext == false) {
+      $(this.miniTreeLoaderSelector).remove();
     }
     $(this.basicInformation).before(data);
     this.moveRestrictionsLabel();

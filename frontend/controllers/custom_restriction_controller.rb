@@ -12,20 +12,23 @@ class CustomRestrictionsController < ApplicationController
       'accessions',
       'archival_objects',
       'digital_objects',
+      'digital_object_components',
       'resources'
     ]
     return unless allowed_types.include?(record_type)
 
-    resolve = ['top_container', 'top_container::container_locations', 'ancestors', 'ancestors::instances::top_container', 'ancestors::instances::top_container::container_locations']
+    resolve = ['top_container', 'top_container::container_locations', 'ancestors', 'ancestors::instances::top_container', 'ancestors::instances::top_container::container_locations', 'digital_object']
     uri = '/repositories/' + repo_id + '/' + record_type + '/' + id
     @tree = ''
     @location = ''
+    @restrictions = {}
 
     unless id.empty?
       record = JSONModel::HTTP.get_json(uri, 'resolve[]' => resolve)
       unless record.nil?
         case record_type
         when 'accessions'
+          @location = AspaceCustomRestrictionsContextHelper.get_location(record)
           @restrictions = toplevel_restriction(record)
         when 'archival_objects'
           @location = AspaceCustomRestrictionsContextHelper.get_ao_location(record)
@@ -33,8 +36,11 @@ class CustomRestrictionsController < ApplicationController
           @restrictions = get_restrictions(record)
         when 'digital_objects'
           @restrictions = toplevel_restriction(record)
+        when 'digital_object_components'
+          @tree = extract_hierarchy(record)
+          @restrictions = get_digital_object_component_restrictions(record)
         when 'resources'
-          @location = AspaceCustomRestrictionsContextHelper.get_resource_location(record)
+          @location = AspaceCustomRestrictionsContextHelper.get_location(record)
           @restrictions = toplevel_restriction(record)
         end
       end
@@ -45,31 +51,23 @@ class CustomRestrictionsController < ApplicationController
 
   private
 
-  def is_restricted?(record)
-    restrictions = {}
-    level = record['level'] == 'otherlevel' ? record['other_level'] : record['level']
-
-    if level.nil?
-      level = record['jsonmodel_type'].gsub('_', ' ').capitalize
-    end
-
-    if record['custom_restriction'] && record['custom_restriction']['custom_restriction_type']
-      restrictions[level] = record['custom_restriction']['custom_restriction_type']
-    elsif record['restrictions_apply'] || record['restrictions']
-      restrictions[level] = 'default'
+  def get_digital_object_component_restrictions(record)
+    restrictions = AspaceCustomRestrictionsContextHelper.is_restricted?(record)
+    if restrictions.empty?
+      restrictions = AspaceCustomRestrictionsContextHelper.is_restricted?(record['digital_object']['_resolved'])
     end
 
     restrictions
   end
 
   def get_restrictions(record)
-    restrictions = is_restricted?(record)
+    restrictions = AspaceCustomRestrictionsContextHelper.is_restricted?(record)
     
     if restrictions.empty?
       if record['ancestors'] && record['ancestors'].length > 0
         record['ancestors'].each do |anc|
           break if restrictions.length > 0 
-          restrictions = is_restricted?(anc['_resolved'])
+          restrictions = AspaceCustomRestrictionsContextHelper.is_restricted?(anc['_resolved'])
         end
       end
     end
@@ -78,15 +76,16 @@ class CustomRestrictionsController < ApplicationController
   end
 
   def toplevel_restriction(record)
-    is_restricted?(record)
+    AspaceCustomRestrictionsContextHelper.is_restricted?(record)
   end
 
   def extract_hierarchy(record)
     hierarchy = {}
     if record['ancestors']
       record['ancestors'].reverse.each do |anc|
-        level = anc['level']
-        title = anc['_resolved']['title']
+        level = anc['level'].nil? ? anc['_resolved']['jsonmodel_type'].sub('_',' '): anc['level']
+        display_string = anc['_resolved']['display_string']
+        title = display_string.nil? || display_string.empty? ? anc['_resolved']['title'] : display_string
         hierarchy[level] = title
       end
     end

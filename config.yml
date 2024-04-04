@@ -12,3 +12,6 @@ parents:
   digital_object:
     name: custom_restriction
     cardinality: zero_to_one
+  digital_object_component:
+    name: custom_restriction
+    cardinality: zero_to_one

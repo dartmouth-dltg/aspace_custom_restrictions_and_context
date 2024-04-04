@@ -27,14 +27,6 @@
     controller.controller_name == "digital_objects" && controller.action_name = "index"
   end
 
-  def accession?
-    controller.controller_name == 'accessions'
-  end
-
-  def digital_object?
-    controller.controller_name == 'digital_objects'
-  end
-
 %>
 
 <% unless current_repo.nil? %>
@@ -44,10 +36,6 @@
   $().ready(() => {
     <% if search_page? || is_accession_idx? || is_digital_object_idx? || is_resource_idx? %>
       objectDecorator.decorateSearchTypes();
-    <% elsif accession? %>
-      objectDecorator.setupDecorateObjectType('accessions');
-    <% elsif digital_object? %>
-      objectDecorator.setupDecorateObjectType('digital_objects');
     <% end %>
   });
 </script>

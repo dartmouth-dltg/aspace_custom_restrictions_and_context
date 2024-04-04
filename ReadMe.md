@@ -8,7 +8,10 @@ custom restrictions and additional contextual information.
 ## Installation
 
 Install as you normally would and add `aspace_custom_restrictions_and_context` to
-your list of enabled plugins in `AppConfig[:plugins]`
+your list of enabled plugins in `AppConfig[:plugins]`.
+
+Run the `setup-database` script before using since the plugin needs to update the
+database.
 
 ## Configuration
 
@@ -34,6 +37,7 @@ The plugin adds a custom restriction sub-record to
 1. resources
 1. archival objects
 1. digital objects
+1. digital_object_components
 
 which allows an editor to tag an object with more nuance than just the stock
 `Restrictions Apply?` checkbox, though if that checkbox had been ticked, the plugin
@@ -55,6 +59,11 @@ are both displayed on the view mode of an an object, while the location is only 
 
 The plugin adds a restriction note to the search & browse results and the object view similarly to the way it
 enhances the staff interface.
+
+## Enumerations
+
+The plugin adds a new editable enumeration - `Custom Restriction Type`. If you add additional values to this
+list, make sure that you also add translations in `frontend/locales/enums`.
 
 ## Note
 
