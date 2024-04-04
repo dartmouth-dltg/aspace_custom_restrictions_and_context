@@ -1,23 +1,25 @@
-<%= javascript_include_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_pui.js" %>
+<% unless AppConfig.has_key?(:aspace_custom_restrictions_pui_enhance) && AppConfig[:aspace_custom_restrictions_pui_enhance] == false %>
+  <%= javascript_include_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_pui.js" %>
 
-<% 
-  def is_search? 
-    controller.controller_name == "search"
-  end
-  def is_resource_idx? 
-    controller.controller_name == "resources"
-  end
-  def is_accession_idx? 
-    controller.controller_name == "accessions"
-  end
-  def is_digital_object_idx? 
-    controller.controller_name == "digital_objects"
-  end
-%>
+  <% 
+    def is_search? 
+      controller.controller_name == "search"
+    end
+    def is_resource_idx? 
+      controller.controller_name == "resources"
+    end
+    def is_accession_idx? 
+      controller.controller_name == "accessions"
+    end
+    def is_digital_object_idx? 
+      controller.controller_name == "digital_objects"
+    end
+  %>
 
-<% if is_search? || is_accession_idx? || is_digital_object_idx? || is_resource_idx? %>
-<script>
-  const puiSearchRestrictions = new CustomRestrictionsPui();
-  puiSearchRestrictions.setupDecoratePuiSearch();
-</script>
+  <% if is_search? || is_accession_idx? || is_digital_object_idx? || is_resource_idx? %>
+  <script>
+    const puiSearchRestrictions = new CustomRestrictionsPui();
+    puiSearchRestrictions.setupDecoratePuiSearch();
+  </script>
+  <% end %>
 <% end %>

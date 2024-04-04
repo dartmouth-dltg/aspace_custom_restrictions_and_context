@@ -1,11 +1,25 @@
 <% unless current_repo.nil? || @resource.nil? %>
-<script>
-  const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`);
-  <% if @resource['custom_restriction'] %>
-    <% custom_restriction = @resource['custom_restriction'] %>
-    custom_restriction.displayRestriction('<%= I18n.t('enumerations.custom_restriction_type.' + custom_restriction['custom_restriction_type'], custom_restriction['custom_restriction_type']) %>');
-  <% elsif @resource['restrictions'] == true %>
-    custom_restriction.displayRestriction('<%= I18n.t('custom_restriction.custom_restriction_default') %>');
+  <% if controller.action_name == 'show' %>
+    <% 
+      display_context = true
+      if AppConfig.has_key?(:aspace_custom_restrictions_show_context) && AppConfig[:aspace_custom_restrictions_show_context] == false 
+        display_context = false
+      end
+
+      resource_location = AspaceCustomRestrictionsContextHelper.get_resource_location(@resource)
+
+      resource_restriction = AspaceCustomRestrictionsContextHelper.is_restricted?(@resource)
+
+      resource_data = render(:partial => 'mini_tree/context', :locals => {
+        :@restrictions => resource_restriction,
+        :@tree => '',
+        :@location => resource_location
+      })
+    %>
+    <script>
+      const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
+      custom_restriction.displayMiniTreeLoader();
+      custom_restriction.addMiniTree(`<%= resource_data %>`)  
+    </script>
   <% end %>
-</script>
 <% end %>

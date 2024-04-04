@@ -1,5 +1,7 @@
 ArchivesSpace::Application.extend_aspace_routes(File.join(File.dirname(__FILE__), "routes.rb"))
 
+require_relative '../lib/aspace_custom_restrictions_and_context_helper'
+
 Rails.application.config.after_initialize do
 
   ActionView::PartialRenderer.class_eval do

@@ -7,11 +7,26 @@ custom restrictions and additional contextual information.
 
 ## Installation
 
-Install as you normally would. There are no configuration options.
+Install as you normally would and add `aspace_custom_restrictions_and_context` to
+your list of enabled plugins in `AppConfig[:plugins]`
 
-### Enhancements
+## Configuration
 
-#### Staff Interface
+The plugin accepts two `AppConfig` configuration options. 
+
+One disables the context and and location display on resources and archival objects. Set
+```
+AppConfig[:aspace_custom_restrictions_show_context] = false
+```
+
+The other disables the display of restrictions in the PUI. Set
+```
+AppConfig[:aspace_custom_restrictions_pui_enhance] = false
+```
+
+## Enhancements
+
+### Staff Interface
 
 The plugin adds a custom restriction sub-record to
 
@@ -36,7 +51,7 @@ The plugin also displays the context (the hierarchical tree) for archival object
 of the archival object or resource if a container instance is attached. The context and location
 are both displayed on the view mode of an an object, while the location is only displayed in search results.
 
-#### PUI
+### PUI
 
 The plugin adds a restriction note to the search & browse results and the object view similarly to the way it
 enhances the staff interface.

@@ -1,5 +1,5 @@
 class CustomRestrictionsAndContext {
-  constructor(repo_id) {
+  constructor(repo_id, displayContext = true) {
     this.miniTreeLoaderSelector = '#custom-restriction-mini-tree-loader';
     this.objectTitleSelector = '.record-pane h2';
     this.auditDisplaySelector = 'div[class*="audit-display"]';
@@ -8,6 +8,7 @@ class CustomRestrictionsAndContext {
     this.basicInformation = '#basic_information';
     this.restrictionsId = '#custom-restriction';
     this.repo_id = repo_id;
+    this.displayContext = displayContext;
     this.objectTypes = ['accessions', 'archival_objects', 'digital_objects', 'resources'];
   }
 
@@ -30,7 +31,8 @@ class CustomRestrictionsAndContext {
     $(this.objectTitleSelector).append(this.restrictionTypeSnippet(restrictionType));
   }
 
-  toggleMiniTree(el) {
+  toggleMiniTree() {
+    const el = this.miniTreeLoaderSelector;
     const miniTree = $(this.miniTreeId);
     const miniTreeControl = $(el);
     if (miniTreeControl.attr('aria-expanded') === 'false') {
@@ -47,9 +49,22 @@ class CustomRestrictionsAndContext {
   }
 
   addMiniTree(data) {
-    $(this.miniTreeLoaderSelector).attr('aria-expanded', 'true');
+    const hasContext = $(data).find('#mini-tree-context').length > 0;
+    const hasLocation = $(data).find('.mini-tree-location').length > 0
+    if (hasContext === false) {
+      $(this.miniTreeLoaderSelector).replaceWith(AS.renderTemplate("template_custom_restrictions_location_only"));
+    }
+    if (hasLocation === false) {
+      $(this.miniTreeLoaderSelector).replaceWith(AS.renderTemplate("template_custom_restrictions_context_only"));
+    }
     $(this.basicInformation).before(data);
     this.moveRestrictionsLabel();
+
+    if (this.displayContext) {
+      $(this.miniTreeLoaderSelector).attr('aria-expanded', 'true');
+    } else {
+
+    }
   }
 
   fetchObjectJson(id, recordType = 'archival_objects') {
@@ -67,17 +82,18 @@ class CustomRestrictionsAndContext {
     });
   }
 
-  displayMiniTreeLoader(id) {
+  displayMiniTreeLoader() {
     const self = this;
-    const miniTreeLoader = AS.renderTemplate("template_custom_restrictions_context");
-    $(this.objectTitleSelector).after(miniTreeLoader);
-    this.fetchObjectJson(id);
 
-    $(this.miniTreeLoaderSelector).on('click', (evt) => {
-      evt.preventDefault();
-      const el = evt.currentTarget;
-      self.toggleMiniTree(el);
-    })
+    if (this.displayContext) {
+      const miniTreeLoader = AS.renderTemplate("template_custom_restrictions_context_and_location");
+      $(this.objectTitleSelector).after(miniTreeLoader);
+
+      $('body').on('click', this.miniTreeLoaderSelector, (evt) => {
+        evt.preventDefault();
+        self.toggleMiniTree();
+      })
+    }
   }
 
   fetchSearchJson(id, target, recordType) {

@@ -1,6 +1,16 @@
 <% unless current_repo.nil? || @archival_object.nil? %>
-<script>
-  const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`);
-  custom_restriction.displayMiniTreeLoader('<%= @archival_object.id %>');
-</script>
+  <% if controller.action_name == 'show' %>
+    <% 
+      if AppConfig.has_key?(:aspace_custom_restrictions_show_context) && AppConfig[:aspace_custom_restrictions_show_context] == false 
+        display_context = false
+      else
+        display_context = true
+      end
+    %>
+    <script>
+      const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
+      custom_restriction.displayMiniTreeLoader();
+      custom_restriction.fetchObjectJson(`<%= @archival_object.id %>`);
+    </script>
+  <% end %>
 <% end %>

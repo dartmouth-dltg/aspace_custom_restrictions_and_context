@@ -49,32 +49,15 @@ class CustomRestrictionsPuiController < ApplicationController
 
   private
 
-  def is_restricted?(record)
-    restrictions = {}
-    level = record['level'] == 'otherlevel' ? record['other_level'] : record['level']
-
-    if level.nil?
-      level = record['jsonmodel_type'].gsub('_', ' ').capitalize
-    end
-
-    if record['custom_restriction'] && record['custom_restriction']['custom_restriction_type']
-      restrictions[level] = record['custom_restriction']['custom_restriction_type']
-    elsif record['restrictions_apply'] || record['restrictions']
-      restrictions[level] = 'default'
-    end
-
-    restrictions
-  end
-
   def get_restrictions(record)
-    restrictions = is_restricted?(ASUtils.json_parse(record['json']))
+    restrictions = AspaceCustomRestrictionsContextHelper.is_restricted?(ASUtils.json_parse(record['json']))
     if restrictions.empty?
       if record['_resolved_ancestors'] && record['_resolved_ancestors'].length > 0
         # uggghhh! resolved ancestors are stored as a hash....ugly
         record['_resolved_ancestors'].to_a.reverse.to_h.each do |anc|
           break if restrictions.length > 0 
           # resolved ancestors are in form [uri, [record]]
-          restrictions = is_restricted?(ASUtils.json_parse(anc.last.first['json']))
+          restrictions = AspaceCustomRestrictionsContextHelper.is_restricted?(ASUtils.json_parse(anc.last.first['json']))
         end
       end
     end
@@ -83,7 +66,7 @@ class CustomRestrictionsPuiController < ApplicationController
   end
 
   def toplevel_restriction(record)
-    is_restricted?(ASUtils.json_parse(record['json']))
+    AspaceCustomRestrictionsContextHelper.is_restricted?(ASUtils.json_parse(record['json']))
   end
 
 end

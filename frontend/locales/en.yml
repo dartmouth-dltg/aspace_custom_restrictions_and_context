@@ -16,7 +16,10 @@ en:
     section_title: Custom Restriction
 
   custom_restrictions_and_context:
-    mini_tree_action: Context & Location (if available)
+    mini_tree_action:
+      context_and_location: Context & Location
+      context_only: Context
+      location_only: Location
     restriction_label: "%{restriction} at the %{level} level"
 
   enumeration_names:

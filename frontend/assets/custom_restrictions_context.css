@@ -63,6 +63,9 @@ span.mini-tree-level-0::before {
   padding-top: 1rem;
   border-top: 1px solid #ccc;
 }
+#mini-tree-locations-and-indicators.no-context-tree {
+  border: none;
+}
 .mini-tree-location {
   display: grid;
   grid-template-columns: min-content 1fr;
