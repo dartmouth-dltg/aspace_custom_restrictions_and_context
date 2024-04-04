@@ -12,7 +12,7 @@ your list of enabled plugins in `AppConfig[:plugins]`
 
 ## Configuration
 
-The plugin accepts two `AppConfig` configuration options. 
+The plugin accepts two configuration options. 
 
 One disables the context and and location display on resources and archival objects. Set
 ```
