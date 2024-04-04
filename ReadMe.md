@@ -37,10 +37,10 @@ The plugin adds a custom restriction sub-record to
 1. resources
 1. archival objects
 1. digital objects
-1. digital_object_components
+1. digital object components
 
 which allows an editor to tag an object with more nuance than just the stock
-`Restrictions Apply?` checkbox, though if that checkbox had been ticked, the plugin
+`Restrictions Apply?` checkbox. However, if that checkbox had been ticked, the plugin
 will also use that data.
 
 The plugin parses the custom restriction data and the `Restrictions Apply?` data and displays
@@ -51,9 +51,10 @@ displayed for both view mode for an object and in search & browse results.
 
 Note that the custom restriction takes precendence over the `Restrictions Apply` checkbox for displays.
 
-The plugin also displays the context (the hierarchical tree) for archival objects and the location
-of the archival object or resource if a container instance is attached. The context and location
-are both displayed on the view mode of an an object, while the location is only displayed in search results.
+The plugin also displays the context (the hierarchical tree) for archival objects and/or the location
+of the archival object, resource, or accession if a container instance is attached. The context and location
+are both displayed on the view mode of an archival object, while the location is only displayed in search results.
+Digital object components will also be enhanced with an additional context tree in view mode.
 
 ### PUI
 
@@ -68,9 +69,10 @@ list, make sure that you also add translations in `frontend/locales/enums`.
 ## Note
 
 In order to make this plugin useful for multiple versions of ArchivesSpace and to limit maintenance of
-multiple version, the plugin uses javascript to enhance the layouts and makes one additional request per object.
+multiple versions, the plugin uses javascript to enhance the layouts and makes one additional request per object.
 For views of a single object this is one additional request, but for search results this will increase the
-number of requests by the default page size.
+number of requests by the default page size. Depending on the resources available to your ArchivesSpace instance,
+you may notice some performance impacts.
 
 ## Credits
 
