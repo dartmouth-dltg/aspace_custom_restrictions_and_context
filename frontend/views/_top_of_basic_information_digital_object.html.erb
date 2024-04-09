@@ -17,7 +17,7 @@
     <script>
       $().ready(() => {
         const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
-        custom_restriction.displayMiniTreeLoader();
+        custom_restriction.displayMiniTreeToggle();
         custom_restriction.addMiniTree(`<%= digital_object_data %>`);
       });
     </script>

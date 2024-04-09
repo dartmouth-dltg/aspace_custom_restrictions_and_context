@@ -1,6 +1,6 @@
 <script>
   $().ready(() => {
     const customObjectRestriction = new CustomRestrictionsPui();
-    customObjectRestriction.setupObjectRestrictionDisplay('<%= record.uri %>');
+    customObjectRestriction.setupObjectRestrictionDisplay('<%= record.uri %>', '<%= record.primary_type %>');
   });
 </script>

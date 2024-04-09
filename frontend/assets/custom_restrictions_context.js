@@ -68,6 +68,10 @@ class CustomRestrictionsAndContext {
     }
   }
 
+  removeMiniTreeToggle() {
+    this.miniTreeLoaderSelector.remove();
+  }
+
   fetchObjectJson(id, recordType = 'archival_objects') {
     const self = this;
     $.ajax({
@@ -80,10 +84,12 @@ class CustomRestrictionsAndContext {
       method: 'post',
     }).done((data) => {
       self.addMiniTree(data);
+    }).fail(() => {
+      self.removeMiniTreeToggle();
     });
   }
 
-  displayMiniTreeLoader() {
+  displayMiniTreeToggle() {
     const self = this;
 
     if (this.displayContext) {
@@ -109,6 +115,8 @@ class CustomRestrictionsAndContext {
       method: 'post',
     }).done((data) => {
       target.append(data);
+    }).fail(() => {
+      console.log('Search enhancements failed for Custom Restrictions and Context plugin.')
     });
   }
 
@@ -134,65 +142,6 @@ class CustomRestrictionsAndContext {
         }
       }
     });
-  }
-
-  monitorTreeNav() {
-    const self = this;
-    $('body').on('click', '.record-title', (evt) => {
-      const recordTarget = evt.currentTarget;
-      const targetHref = $(recordTarget).attr('href');
-      const typeAndId = targetHref.split('::').slice(-1).toString();
-      const type = `${typeAndId.split("_").slice(0, -1).join("_")}s`;
-      const id = typeAndId.split("_").slice(-1).toString();
-      self.checkObjectStatus(type, id);
-    });
-  }
-
-  checkObjectIsLoaded(type, id) {
-    const self = this;
-    const auditDisplay = $('div[class*="audit-display"]');
-    if (auditDisplay.length) {
-      const objectId = auditDisplay
-        .find('input#uri')
-        .attr('value')
-        .split('/')
-        .slice(-1)
-        .toString();
-    }
-    if (typeof objectId !== 'undefined' && objectId === id) {
-      return true;
-    }
-  }
-
-  displayObjectDecoration(type, auditDisplay) {
-    const objectId = $(auditDisplay).find('input#uri').attr('value').split('/').slice(-1).toString();
-    this.fetchObjectJson(objectId, type);
-  }
-
-  checkObjectStatus(type, id) {
-    const self = this;
-    if (this.objectTypes.includes(type)) {
-      if ($(this.auditDisplaySelector).length > 0 ) {
-        if (id !== null && this.checkObjectIsLoaded(type, id)) {
-          self.displayObjectDecoration(type, self.auditDisplaySelector);
-        } else {
-          this.waitForEl(this.auditDisplaySelector, () => {
-            self.displayObjectDecoration(type, self.auditDisplaySelector);
-          });
-        }
-      } else {
-        this.waitForEl(this.auditDisplaySelector, () => {
-          self.displayObjectDecoration(type, self.auditDisplaySelector);
-        });
-      }
-    }
-  }
-
-  setupDecorateObjectType(type, id = null) {
-    $('body').on('click', 'a.record-title', (evt) => {
-      this.monitorTreeNav();
-    });
-    this.checkObjectStatus(type, id);
   }
 
 }

@@ -24,6 +24,8 @@ class CustomRestrictionsPui {
       } else {
         target.after(self.puiRestrictionTemplate(data));
       }
+    }).fail(() => {
+      console.log('Data fetch failed for Custom Restrictions and Context plugin.');
     });
   }
   
@@ -41,11 +43,11 @@ class CustomRestrictionsPui {
     });
   }
 
-  setupObjectRestrictionDisplay(uri) {
+  setupObjectRestrictionDisplay(uri, primary_type) {
     const self = this;
+    const type = `${primary_type}s`;
     if (uri.length) {
       const target = $(self.objectHeadingSelector);
-      const type = uri.split("/").slice(-2, -1).join("");
       if (self.objectTypes.includes(type)) {
         self.fetchSearchJson(uri, type, target, true);
       }

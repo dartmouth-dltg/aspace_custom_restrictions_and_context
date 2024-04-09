@@ -9,7 +9,7 @@
     <script>
       $().ready(() => {
         const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
-        custom_restriction.displayMiniTreeLoader();
+        custom_restriction.displayMiniTreeToggle();
         custom_restriction.fetchObjectJson(`<%= @digital_object_component.id %>`, 'digital_object_components');
       });
     </script>
