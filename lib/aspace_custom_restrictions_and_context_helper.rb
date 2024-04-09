@@ -27,11 +27,13 @@ class AspaceCustomRestrictionsContextHelper
     aos_for_res_type = AppConfig.has_key?(:aspace_custom_restriction_type_mapping) ? AppConfig[:aspace_custom_restriction_type_mapping] : nil
 
     # check if we have a restriction type that only applies to certain levels
-    restrictions.each do |restriction_level, restriction|
-      if aos_for_res_type.keys.include?(restriction)
-        aos_for_res_type.each do |restriction_type, ao_types|
-          unless ao_types.include?(result_level)
-            restrictions = {}
+    unless aos_for_res_type.nil?
+      restrictions.each do |restriction_level, restriction|
+        if aos_for_res_type.keys.include?(restriction)
+          aos_for_res_type.each do |restriction_type, ao_types|
+            unless ao_types.include?(result_level)
+              restrictions = {}
+            end
           end
         end
       end
