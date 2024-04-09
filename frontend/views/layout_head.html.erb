@@ -2,42 +2,42 @@
 <%= stylesheet_link_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.css" %>
 <%= javascript_include_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.js" %>
 
-<%
-  # there isn't any place to stick additional view logic in these, so we need to 
-  # go pure js to initialize
+<% unless AppConfig.has_key?(:aspace_custom_restrictions_sui_search_enhance) && AppConfig[:aspace_custom_restrictions_sui_search_enhance] == false %>
+  <%
+    # there isn't any place to stick additional view logic in these, so we need to 
+    # go pure js to initialize
 
-  display_context = true
-  if AppConfig.has_key?(:aspace_custom_restrictions_show_context) && AppConfig[:aspace_custom_restrictions_show_context] == false 
-    display_context = false
-  end
+    display_context = true
+    if AppConfig.has_key?(:aspace_custom_restrictions_show_context) && AppConfig[:aspace_custom_restrictions_show_context] == false 
+      display_context = false
+    end
 
-  def search_page?
-    controller.controller_name == "search"
-  end
+    def search_page?
+      controller.controller_name == "search"
+    end
 
-  def is_resource_idx? 
-    controller.controller_name == "resources" && controller.action_name = "index"
-  end
+    def is_resource_idx? 
+      controller.controller_name == "resources" && controller.action_name = "index"
+    end
 
-  def is_accession_idx? 
-    controller.controller_name == "accessions" && controller.action_name = "index"
-  end
+    def is_accession_idx? 
+      controller.controller_name == "accessions" && controller.action_name = "index"
+    end
 
-  def is_digital_object_idx? 
-    controller.controller_name == "digital_objects" && controller.action_name = "index"
-  end
+    def is_digital_object_idx? 
+      controller.controller_name == "digital_objects" && controller.action_name = "index"
+    end
 
-%>
+  %>
 
-<% unless current_repo.nil? %>
-
-<script>
-  const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
-  $().ready(() => {
-    <% if search_page? || is_accession_idx? || is_digital_object_idx? || is_resource_idx? %>
-      objectDecorator.decorateSearchTypes();
-    <% end %>
-  });
-</script>
-
+  <% unless current_repo.nil? %>
+    <script>
+      const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
+      $().ready(() => {
+        <% if search_page? || is_accession_idx? || is_digital_object_idx? || is_resource_idx? %>
+          objectDecorator.decorateSearchTypes();
+        <% end %>
+      });
+    </script>
+  <% end %>
 <% end %>

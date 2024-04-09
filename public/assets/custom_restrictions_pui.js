@@ -1,12 +1,12 @@
 class CustomRestrictionsPui {
   constructor() {
     this.searchResultsSelector = '.search-results';
-    this.objectHeadingSelector = '#main-content h1';
+    this.objectHeadingSelector = 'h1';
     this.objectTypes = ['accessions', 'archival_objects', 'digital_objects', 'digital_object_components', 'resources'];
   }
 
   puiRestrictionTemplate(data) {
-    return `<span class="label label-danger">${data}</span>`;
+    return `<span class="aspace-custom-restrictions label label-danger">${data}</span>`;
   }
 
   fetchSearchJson(dataUri, type, target, objectDisplay = false) {
@@ -19,10 +19,12 @@ class CustomRestrictionsPui {
       },
       method: 'post',
     }).done((data) => {
-      if (objectDisplay) {
-        target.append(self.puiRestrictionTemplate(data));
-      } else {
-        target.after(self.puiRestrictionTemplate(data));
+      if (data.length > 1) {
+        if (objectDisplay) {
+          target.append(self.puiRestrictionTemplate(data));
+        } else {
+          target.after(self.puiRestrictionTemplate(data));
+        }
       }
     }).fail(() => {
       console.log('Data fetch failed for Custom Restrictions and Context plugin.');

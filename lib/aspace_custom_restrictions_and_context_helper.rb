@@ -1,12 +1,49 @@
 class AspaceCustomRestrictionsContextHelper
 
-  def self.is_restricted?(record)
-    restrictions = {}
+  def self.record_level(record)
     level = record['level'] == 'otherlevel' ? record['other_level'] : record['level']
 
     if level.nil?
       level = record['jsonmodel_type'].gsub('_', ' ').capitalize
     end
+
+    level
+  end
+
+  def self.restriction_applies_to_object?(record, restrictions)
+    # list the level that a restriction applies to
+    # default is all restriction types apply to all levels
+    # uses config option specified like:
+    # AppConfig[:aspace_custom_restriction_type_mapping] = {
+    #  'some_materials_restricted' => [
+    #    'otherlevel',
+    #    'box',
+    #    'collection',
+    #    'series',
+    #    'subseries'
+    #  ]
+    # }
+    result_level = record_level(record).downcase
+    aos_for_res_type = AppConfig.has_key?(:aspace_custom_restriction_type_mapping) ? AppConfig[:aspace_custom_restriction_type_mapping] : nil
+
+    # check if we have a restriction type that only applies to certain levels
+    restrictions.each do |restriction_level, restriction|
+      if aos_for_res_type.keys.include?(restriction)
+        aos_for_res_type.each do |restriction_type, ao_types|
+          unless ao_types.include?(result_level)
+            restrictions = {}
+          end
+        end
+      end
+    end
+
+    restrictions
+
+  end
+
+  def self.is_restricted?(record)
+    restrictions = {}
+    level = record_level(record)
 
     if record['custom_restriction'] && record['custom_restriction']['custom_restriction_type']
       restrictions[level] = record['custom_restriction']['custom_restriction_type']

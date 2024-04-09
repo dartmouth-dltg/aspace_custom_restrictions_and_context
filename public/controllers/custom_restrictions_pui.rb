@@ -37,9 +37,16 @@ class CustomRestrictionsPuiController < ApplicationController
         when 'resources'
           restrictions = toplevel_restriction(record.raw)
         end
+
+        restrictions = AspaceCustomRestrictionsContextHelper.restriction_applies_to_object?(ASUtils.json_parse(record.raw['json']), restrictions)
+
         # restrictions is in form {level => restriction_type}
-        restriction_message = I18n.t('enumerations.custom_restriction_type.' + restrictions.values.first, I18n.t('enumerations.custom_restriction_type.default'))
-        render :json => ASUtils.to_json(restriction_message)
+        if restrictions.empty?
+          render :json => {}
+        else
+          restriction_message = I18n.t('enumerations.custom_restriction_type.' + restrictions.values.first, I18n.t('enumerations.custom_restriction_type.default'))
+          render :json => ASUtils.to_json(restriction_message)
+        end
 
       else
         render :json => {}

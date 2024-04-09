@@ -45,6 +45,8 @@ class CustomRestrictionsController < ApplicationController
         end
       end
     end
+
+    @restrictions = AspaceCustomRestrictionsContextHelper.restriction_applies_to_object?(record, @restrictions)
     
     render_aspace_partial :partial => "mini_tree/context"
   end

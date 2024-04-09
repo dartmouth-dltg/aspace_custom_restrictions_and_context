@@ -15,17 +15,41 @@ database.
 
 ## Configuration
 
-The plugin accepts two configuration options. 
+The plugin accepts several configuration options. 
 
-One disables the context and and location display on resources and archival objects. Set
+Disable the context and and location display on resources and archival objects. Set
 ```
 AppConfig[:aspace_custom_restrictions_show_context] = false
 ```
 
-The other disables the display of restrictions in the PUI. Set
+Disable the restrictions on Staff search results. Set
+```
+AppConfig[:aspace_custom_restrictions_sui_search_enhance] = false
+```
+
+Disable the display of restrictions in the PUI. Set
 ```
 AppConfig[:aspace_custom_restrictions_pui_enhance] = false
 ```
+
+To limit the  of display certain restrictions to specific object types, use a configuration
+options like
+```
+AppConfig[:aspace_custom_restriction_type_mapping] = {
+  'some_materials_restricted' => [
+    'otherlevel',
+    'box', # this is a potential otherlevel type
+    'collection',
+    'series',
+    'subseries'
+  ]
+}
+```
+Note that the key(s) must correspond to the restriction types set in the Custom Restriction Type
+enumeration. The array list should consist of the levels or (in the case of accessions, 
+digital objects, and digital object components) the jsonmodel_type (e.g. `digital_object`). 
+If you use `otherlevel`, include the `otherlevel` types you use. The default is to apply all
+restriction types to all relevant objects (see below).
 
 ## Enhancements
 
