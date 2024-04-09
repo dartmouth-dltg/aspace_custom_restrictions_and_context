@@ -1,4 +1,5 @@
 <% unless AppConfig.has_key?(:aspace_custom_restrictions_pui_enhance) && AppConfig[:aspace_custom_restrictions_pui_enhance] == false %>
+  <%= stylesheet_link_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_pui.css" %>
   <%= javascript_include_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_pui.js" %>
 
   <% 

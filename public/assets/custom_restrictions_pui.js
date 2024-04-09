@@ -1,7 +1,7 @@
 class CustomRestrictionsPui {
   constructor() {
     this.searchResultsSelector = '.search-results';
-    this.objectHeadingSelector = 'h1';
+    this.objectHeadingSelector = '#content h1';
     this.objectTypes = ['accessions', 'archival_objects', 'digital_objects', 'digital_object_components', 'resources'];
   }
 
