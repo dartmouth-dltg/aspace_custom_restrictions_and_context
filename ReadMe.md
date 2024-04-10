@@ -13,7 +13,7 @@ your list of enabled plugins in `AppConfig[:plugins]`.
 Run the `setup-database` script before using since the plugin needs to update the
 database.
 
-The plugin does not have andy additional dependencies so you do not need to run
+The plugin does not have any additional dependencies so you do not need to run
 the `initialize-plugin` script.
 
 ## Configuration
