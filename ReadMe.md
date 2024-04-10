@@ -13,6 +13,9 @@ your list of enabled plugins in `AppConfig[:plugins]`.
 Run the `setup-database` script before using since the plugin needs to update the
 database.
 
+The plugin does not have andy additional dependencies so you do not need to run
+the `initialize-plugin` script.
+
 ## Configuration
 
 The plugin accepts several configuration options. 
@@ -73,7 +76,7 @@ on all of its descendants. The language displayed depends on the custom restrict
 provides a default. See `frontend/locales/enums` for values supplied by the plugin. This is
 displayed for both view mode for an object and in search & browse results.
 
-Note that the custom restriction takes precendence over the `Restrictions Apply` checkbox for displays.
+Note that the custom restriction takes precendence over the `Restrictions Apply?` checkbox for displays.
 
 The plugin also displays the context (the hierarchical tree) for archival objects and/or the location
 of the archival object, resource, or accession if a container instance is attached. The context and location
