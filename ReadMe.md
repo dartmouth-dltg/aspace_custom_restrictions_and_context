@@ -70,13 +70,18 @@ which allows an editor to tag an object with more nuance than just the stock
 `Restrictions Apply?` checkbox. However, if that checkbox had been ticked, the plugin
 will also use that data.
 
-The plugin parses the custom restriction data and the `Restrictions Apply?` data and displays
-a warning on the object that the restriction has been applied. It also displays the restriction text
-on all of its descendants. The language displayed depends on the custom restriction selected or 
+The plugin parses the custom restriction data, any Conditions Governing Access notes,
+and the `Restrictions Apply?` data and displays a warning on the object that the restriction
+has been applied. It also displays the restriction text on all of its descendants. The
+language displayed depends on the custom restriction selected or 
 provides a default. See `frontend/locales/enums` for values supplied by the plugin. This is
 displayed for both view mode for an object and in search & browse results.
 
-Note that the custom restriction takes precendence over the `Restrictions Apply?` checkbox for displays.
+Note that the precedence order for restrictions is
+
+1. Custom restriction
+1. Conditions Governing Access note
+1. `Restrictions Apply?` checkbox
 
 The plugin also displays the context (the hierarchical tree) for archival objects and/or the location
 of the archival object, resource, or accession if a container instance is attached. The context and location
