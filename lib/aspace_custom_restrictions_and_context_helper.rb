@@ -68,9 +68,19 @@ class AspaceCustomRestrictionsContextHelper
   def self.has_local_access_note?(notes_json)
     has_local_access_restriction = false
     notes_json.each do |note|
-      break if has_local_access_restriction
       if note['type'] == 'accessrestrict'
         has_local_access_restriction = true
+        if AppConfig.has_key?(:aspace_custom_restrictions_access_note_skip_phrases) && AppConfig[:aspace_custom_restrictions_access_note_skip_phrases].kind_of?(Array)
+          note['subnotes'].each do |subnote|
+            break if !has_local_access_restriction
+            AppConfig[:aspace_custom_restrictions_access_note_skip_phrases].each do |skip_phrase|
+              break if !has_local_access_restriction
+              if subnote['content'].downcase.include?(skip_phrase.downcase)
+                has_local_access_restriction = false
+              end
+            end
+          end
+        end
       end
     end
 

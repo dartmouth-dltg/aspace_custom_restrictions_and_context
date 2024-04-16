@@ -54,6 +54,17 @@ digital objects, and digital object components) the jsonmodel_type (e.g. `digita
 If you use `otherlevel`, include the `otherlevel` types you use. The default is to apply all
 restriction types to all relevant objects (see below).
 
+If you have Condition Governing Access Notes and have noted that a object is open, you can
+direct the restrictions plugin to skip/ignore certain phrases. For example, if you had added
+notes that state `open for access`, you can add that to the 
+`aspace_custom_restrictions_access_note_skip_phrases` configuration option.
+```
+AppConfig[:aspace_custom_restrictions_access_note_skip_phrase] = [
+  'open for access'
+]
+```
+You can have multiple skip phrases.
+
 ## Enhancements
 
 ### Staff Interface
