@@ -69,7 +69,7 @@ class CustomRestrictionsAndContext {
   }
 
   removeMiniTreeToggle() {
-    this.miniTreeLoaderSelector.remove();
+    $(this.miniTreeLoaderSelector).remove();
   }
 
   fetchObjectJson(id, recordType = 'archival_objects') {
