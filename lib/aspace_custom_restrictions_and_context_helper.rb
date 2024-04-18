@@ -1,5 +1,9 @@
 class AspaceCustomRestrictionsContextHelper
 
+  def self.use_accessrestrict?
+   AppConfig.has_key?(:aspace_custom_restrictions_use_accessrestrict) && AppConfig[:aspace_custom_restrictions_use_accessrestrict] == false ? false : true
+  end
+
   def self.record_level(record)
     level = record['level'] == 'otherlevel' ? record['other_level'] : record['level']
 
@@ -49,16 +53,18 @@ class AspaceCustomRestrictionsContextHelper
 
     if record['custom_restriction'] && record['custom_restriction']['custom_restriction_type']
       restrictions[level] = record['custom_restriction']['custom_restriction_type']
-    elsif record['notes']
-      if has_local_access_note?(record['notes'])
-        # If you want to tailor the restriction by access note type
-        # you'll want to map the access type to a restriction message.
-        # Since access notes can have multiple types, you'll also need
-        # to decide what the priority of the access note types is for display.
-        # For now, we just use the default.
-        restrictions[level] = 'default'
-      end
-    elsif record['restrictions_apply'] || record['restrictions']
+    end
+
+    if restrictions.empty? && record['notes'] && use_accessrestrict? && has_local_access_note?(record['notes'])
+      # If you want to tailor the restriction by access note type
+      # you'll want to map the access type to a restriction message.
+      # Since access notes can have multiple types, you'll also need
+      # to decide what the priority of the access note types is for display.
+      # For now, we just use the default.
+      restrictions[level] = 'default'
+    end
+
+    if restrictions.empty? && (record['restrictions_apply'] || record['restrictions'])
       restrictions[level] = 'default'
     end
 

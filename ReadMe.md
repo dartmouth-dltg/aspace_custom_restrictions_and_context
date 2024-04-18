@@ -65,6 +65,12 @@ AppConfig[:aspace_custom_restrictions_access_note_skip_phrases] = [
 ```
 You can have multiple skip phrases in the configuration option.
 
+You can also completely turn off the use of Conditions Governing Access notes in the restriction
+calculation.
+```
+AppConfig[:aspace_custom_restrictions_use_accessrestrict] = false
+```
+
 ## Enhancements
 
 ### Staff Interface
