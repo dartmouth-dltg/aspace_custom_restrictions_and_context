@@ -119,7 +119,7 @@ class AspaceCustomRestrictionsContextHelper
   def self.parse_containers(instances)
     containers = []
     instances.each do |inst|
-      if inst['sub_container']['top_container'] && inst['sub_container']['top_container']['_resolved']
+      if inst['sub_container'] && inst['sub_container']['top_container'] && inst['sub_container']['top_container']['_resolved']
         indicator = inst['sub_container']['top_container']['_resolved']['indicator']
         type = inst['sub_container']['top_container']['_resolved']['type']
         locations = parse_container_locations(inst['sub_container']['top_container']['_resolved']['container_locations'])
