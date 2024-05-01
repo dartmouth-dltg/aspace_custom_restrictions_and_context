@@ -6,19 +6,19 @@
         display_context = false
       end
 
-      digital_object_restriction = AspaceCustomRestrictionsContextHelper.is_restricted?(@digital_object)
+      restriction, location, tree = AspaceCustomRestrictionsContextHelper.view_content(@digital_object['uri'])
 
-      digital_object_data = render(:partial => 'mini_tree/context', :locals => {
-        :@restrictions => digital_object_restriction,
-        :@tree => '',
-        :@location => {}
+      view_data = render(:partial => 'mini_tree/context', :locals => {
+        :@restrictions => restriction,
+        :@tree => tree,
+        :@location => location
       })
     %>
     <script>
       $().ready(() => {
         const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
         custom_restriction.displayMiniTreeToggle();
-        custom_restriction.addMiniTree(`<%= digital_object_data %>`);
+        custom_restriction.addMiniTree(`<%= view_data %>`);
       });
     </script>
   <% end %>

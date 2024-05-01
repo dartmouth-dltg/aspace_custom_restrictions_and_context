@@ -168,4 +168,24 @@ class AspaceCustomRestrictionsContextHelper
     return indicator_and_location
   end
 
+  def self.view_content(uri)
+    restrictions = {}
+    locations = {} 
+    context_tree = ''
+
+    obj_data = JSONModel::HTTP.get_json('/search/records', 'uri[]' => uri)
+
+    unless obj_data.fetch('results', []).empty?
+      record = obj_data.fetch('results').fetch(0)
+    end
+
+    unless record.nil?
+      restrictions = record['custom_restrictions_u_sstr'].nil? ? {} : ASUtils.json_parse(record['custom_restrictions_u_sstr'].first)
+      locations = record['custom_restrictions_locations_u_sstr'].nil? ? {} : ASUtils.json_parse(record['custom_restrictions_locations_u_sstr'].first)
+      context_tree = record['custom_restrictions_context_u_sstr'].nil? ? {} : ASUtils.json_parse(record['custom_restrictions_context_u_sstr'].first)
+    end
+    
+    return restrictions, locations, context_tree
+  end
+
 end

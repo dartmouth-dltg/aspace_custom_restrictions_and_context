@@ -18,27 +18,18 @@ class CustomRestrictionsPuiController < ApplicationController
     if allowed_types.include?(record_type)
 
       begin
-        record = ArchivesSpaceClient.instance.get_record(uri, 'resolve[]' => resolve)
+        results = ArchivesSpaceClient.instance.search_records([uri])
       rescue
         record = false
       end
 
+      unless results.raw.fetch('results', []).empty?
+        record = results.raw.fetch('results').fetch(0)
+      end
+
       if record
-
-        case record_type
-        when 'accessions'
-          restrictions = toplevel_restriction(record.raw)
-        when 'archival_objects'
-          restrictions = get_restrictions(record.raw)
-        when 'digital_objects'
-          restrictions = toplevel_restriction(record.raw)
-        when 'digital_object_components'
-          restrictions = get_restrictions(record.raw)
-        when 'resources'
-          restrictions = toplevel_restriction(record.raw)
-        end
-
-        restrictions = AspaceCustomRestrictionsContextHelper.restriction_applies_to_object?(ASUtils.json_parse(record.raw['json']), restrictions)
+        restrictions = record['custom_restrictions_u_sstr'].nil? ? {} : ASUtils.json_parse(record['custom_restrictions_u_sstr'].fetch(0))
+        restrictions = AspaceCustomRestrictionsContextHelper.restriction_applies_to_object?(record, restrictions)
 
         # restrictions is in form {level => restriction_type}
         if restrictions.empty?
@@ -59,28 +50,6 @@ class CustomRestrictionsPuiController < ApplicationController
     else
       render :json => {}
     end
-  end
-
-  private
-
-  def get_restrictions(record)
-    restrictions = AspaceCustomRestrictionsContextHelper.is_restricted?(ASUtils.json_parse(record['json']))
-    if restrictions.empty?
-      if record['_resolved_ancestors'] && record['_resolved_ancestors'].length > 0
-        # uggghhh! resolved ancestors are stored as a hash....ugly
-        record['_resolved_ancestors'].to_a.reverse.to_h.each do |anc|
-          break if restrictions.length > 0 
-          # resolved ancestors are in form [uri, [record]]
-          restrictions = AspaceCustomRestrictionsContextHelper.is_restricted?(ASUtils.json_parse(anc.last.first['json']))
-        end
-      end
-    end
-
-    restrictions
-  end
-
-  def toplevel_restriction(record)
-    AspaceCustomRestrictionsContextHelper.is_restricted?(ASUtils.json_parse(record['json']))
   end
 
 end

@@ -15,3 +15,33 @@
   <%= I18n.t("custom_restrictions_and_context.mini_tree_action.location_only") %>
 </button>
 --></div>
+
+<div id="template_custom_restrictions_search_enhance"><!--
+  {if  Object.keys(restrictions).length > 0}
+    <div id="custom-restriction" class="label label-danger">
+      {for restriction in restrictions}
+        <span>
+          ${restriction}
+        </span>
+      {/for}
+    </div>
+  {/if}
+  {if Object.keys(locations).length > 0}
+    <div id="mini-tree-locations-and-indicators" class="no-context-tree">
+      {for location in locations}
+        <div class="mini-tree-location">
+          <div>
+            <div class="mini-tree-indicator">
+              ${location.type}
+            </div>
+            <div class="mini-tree-locations">
+              {for place in location.places}
+                <span class="mini-tree-location-place">${place}</span>
+              {/for}
+            </div>
+          </div>
+        </div>
+      {/for}
+    </div>
+  {/if}
+--></div>

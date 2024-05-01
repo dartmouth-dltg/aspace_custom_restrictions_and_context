@@ -1,6 +1,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 <%= stylesheet_link_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.css" %>
 <%= javascript_include_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.js" %>
+<%= javascript_include_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_tree_additions.js" %>
 
 <% unless AppConfig.has_key?(:aspace_custom_restrictions_sui_search_enhance) && AppConfig[:aspace_custom_restrictions_sui_search_enhance] == false %>
   <%
@@ -28,15 +29,58 @@
       controller.controller_name == "digital_objects" && controller.action_name = "index"
     end
 
+    custom_restrictions_object_data = {}
+
+    unless @search_data.nil?
+      @search_data['results'].each do |result|
+        unless result['custom_restrictions_u_sstr'].nil?
+          restrictions = []
+          locations = []
+
+          raw_restrictions = result['custom_restrictions_u_sstr'].nil? ? {} : ASUtils.json_parse(result['custom_restrictions_u_sstr'].first)
+          raw_restrictions.each do |level, restriction|
+            restrictions << I18n.t('custom_restrictions_and_context.restriction_label', 
+                              {
+                                :level => level.titleize,
+                                :restriction => I18n.t('enumerations.custom_restriction_type.' + restriction, I18n.t('enumerations.custom_restriction_type.default'))
+                              }
+                            )
+          end
+
+          raw_locations = result['custom_restrictions_locations_u_sstr'].nil? ? {} : ASUtils.json_parse(result['custom_restrictions_locations_u_sstr'].first)
+          raw_locations.each do |loc|
+            places = []
+            loc['locations'].each do |place|
+              places << place
+            end
+            locations << {
+              'type' => loc['type'].nil? ? 'Container' : "#{loc['type'].capitalize} #{loc['indicator']}",
+              'places' => places
+            }
+          end
+          
+          custom_restrictions_object_data[result['id']] = {
+            'custom_restrictions' => restrictions,
+            'custom_locations' => locations
+          }
+        end
+      end
+    end
   %>
 
   <% unless current_repo.nil? %>
     <script>
-      const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
       $().ready(() => {
         <% if search_page? || is_accession_idx? || is_digital_object_idx? || is_resource_idx? %>
+          const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>, `<%= raw ASUtils.to_json(custom_restrictions_object_data) %>`);
           objectDecorator.decorateSearchTypes();
+        <% else %>
+          const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
         <% end %>
+        if (typeof tree !== 'undefined') {
+          const customTree = new CustomRestrictionsTree(tree, `<%= current_repo.id %>`);
+          customTree.initialize();
+        }
       });
     </script>
   <% end %>
