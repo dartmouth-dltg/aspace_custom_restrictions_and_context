@@ -55,10 +55,12 @@
     $().ready(() => {
       const puiSearchRestrictions = new CustomRestrictionsPui(`<%= raw ASUtils.to_json(custom_restrictions_object_data) %>`);
       puiSearchRestrictions.setupDecoratePuiSearch();
-      if (typeof tree !== 'undefined') {
-        const customTree = new CustomRestrictionsTree(tree);
-        customTree.initialize();
-      }
+      <% unless AppConfig.has_key?(:aspace_custom_restrictions_pui_tree) && AppConfig[:aspace_custom_restrictions_pui_tree] == false %>
+        if (typeof tree !== 'undefined') {
+          const customTree = new CustomRestrictionsTree(tree);
+          customTree.initialize();
+        }
+      <% end %>
     });
   </script>
   <% end %>

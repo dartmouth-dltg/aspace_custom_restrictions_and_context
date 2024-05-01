@@ -16,6 +16,11 @@ database.
 The plugin does not have any additional dependencies so you do not need to run
 the `initialize-plugin` script.
 
+### Reindex Required
+
+A soft reindex is required. See the ArchivesSpace 
+[Tech Docs](https://archivesspace.github.io/tech-docs/administration/indexes.html).
+
 ## Configuration
 
 The plugin accepts several configuration options. 
@@ -71,6 +76,15 @@ calculation.
 AppConfig[:aspace_custom_restrictions_use_accessrestrict] = false
 ```
 
+Tree decoration is also optional. You can choose to turn these off to conserve server resources.
+```
+AppConfig[:aspace_custom_restrictions_staff_tree] = false
+```
+and
+```
+AppConfig[:aspace_custom_restrictions_pui_tree] = false
+```
+
 ## Enhancements
 
 ### Staff Interface
@@ -105,10 +119,14 @@ of the archival object, resource, or accession if a container instance is attach
 are both displayed on the view mode of an archival object, while the location is only displayed in search results.
 Digital object components will also be enhanced with an additional context tree in view mode.
 
+Finally, unless configured otherwise, the trees for resources and digital objects are decorated with warnings for objects in the tree
+that have a restriction.
+
 ### PUI
 
 The plugin adds a restriction note to the search & browse results and the object view similarly to the way it
-enhances the staff interface.
+enhances the staff interface. Unless configured otherwise, trees for resources and digital objects are also 
+decorated with warnings for objects in the tree that have a restriction.
 
 ## Enumerations
 
@@ -118,10 +136,9 @@ list, make sure that you also add translations in `frontend/locales/enums`.
 ## Note
 
 In order to make this plugin useful for multiple versions of ArchivesSpace and to limit maintenance of
-multiple versions, the plugin uses javascript to enhance the layouts and makes one additional request per object.
-For views of a single object this is one additional request, but for search results this will increase the
-number of requests by the default page size. Depending on the resources available to your ArchivesSpace instance,
-you may notice some performance impacts.
+multiple versions, the plugin uses javascript to enhance the tree layouts and makes one additional request 
+per tree object. Depending on the resources available to your ArchivesSpace instance, you may notice some
+performance impacts.
 
 ## Credits
 
