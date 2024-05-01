@@ -13,17 +13,6 @@ class CustomRestrictionsAndContext {
     this.objectTypes = ['accessions', 'archival_objects', 'digital_objects', 'digital_object_components', 'resources'];
   }
 
-  waitForEl(selector, callback) {
-    const self = this;
-    if ($(selector).length) {
-      callback();
-    } else {
-      setTimeout(() => {
-        self.waitForEl(selector, callback);
-      }, 100);
-    }
-  }
-
   restrictionTypeSnippet(restrictionType) {
     return `<div id="custom-restriction" class="label label-danger">${restrictionType}</div>`;
   }

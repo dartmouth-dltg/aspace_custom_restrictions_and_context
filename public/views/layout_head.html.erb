@@ -2,7 +2,10 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <%= stylesheet_link_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_pui.css" %>
   <%= javascript_include_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_pui.js" %>
+  <%= javascript_include_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_tree_base.js" %>
   <%= javascript_include_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_tree_additions_pui.js" %>
+  <%= javascript_include_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_infinite_tree.js" %>
+  <%= javascript_include_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_infinite_records.js" %>
   <% 
 
     def is_search? 
@@ -59,6 +62,14 @@
         if (typeof tree !== 'undefined') {
           const customTree = new CustomRestrictionsTree(tree);
           customTree.initialize();
+        }
+        if (typeof infiniteTree !== 'undefined') {
+          const customInfiniteTree = new CustomRestrictionsInfiniteTree();
+          customInfiniteTree.initialize();
+        }
+         if (typeof infiniteRecords !== 'undefined') {
+          const customInfiniteRecords = new CustomRestrictionsInfiniteRecords();
+          customInfiniteRecords.initialize();
         }
       <% end %>
     });
