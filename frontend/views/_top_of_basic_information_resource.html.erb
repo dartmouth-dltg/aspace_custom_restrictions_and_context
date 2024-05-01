@@ -6,21 +6,19 @@
         display_context = false
       end
 
-      resource_location = AspaceCustomRestrictionsContextHelper.get_location(@resource)
+      restriction, location, tree = AspaceCustomRestrictionsContextHelper.view_content(@resource['uri'])
 
-      resource_restriction = AspaceCustomRestrictionsContextHelper.is_restricted?(@resource)
-
-      resource_data = render(:partial => 'mini_tree/context', :locals => {
-        :@restrictions => resource_restriction,
-        :@tree => '',
-        :@location => resource_location
+      view_data = render(:partial => 'mini_tree/context', :locals => {
+        :@restrictions => restriction,
+        :@tree => tree,
+        :@location => location
       })
     %>
     <script>
       $().ready(() => {
         const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
         custom_restriction.displayMiniTreeToggle();
-        custom_restriction.addMiniTree(`<%= resource_data %>`);
+        custom_restriction.addMiniTree(`<%= view_data %>`);
       });
     </script>
   <% end %>
