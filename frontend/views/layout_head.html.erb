@@ -79,7 +79,7 @@
         <% end %>
         <% unless AppConfig.has_key?(:aspace_custom_restrictions_staff_tree) && AppConfig[:aspace_custom_restrictions_staff_tree] == false %>
           if (typeof tree !== 'undefined') {
-            const customTree = new CustomRestrictionsTree(tree, `<%= current_repo.id %>`);
+            const customTree = new CustomRestrictionsTree(`<%= current_repo.id %>`);
             customTree.initialize();
           }
         <% end %>
