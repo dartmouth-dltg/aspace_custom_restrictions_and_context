@@ -77,10 +77,12 @@
         <% else %>
           const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
         <% end %>
-        if (typeof tree !== 'undefined') {
-          const customTree = new CustomRestrictionsTree(tree, `<%= current_repo.id %>`);
-          customTree.initialize();
-        }
+        <% unless AppConfig.has_key?(:aspace_custom_restrictions_staff_tree) && AppConfig[:aspace_custom_restrictions_staff_tree] == false %>
+          if (typeof tree !== 'undefined') {
+            const customTree = new CustomRestrictionsTree(tree, `<%= current_repo.id %>`);
+            customTree.initialize();
+          }
+        <% end %>
       });
     </script>
   <% end %>
