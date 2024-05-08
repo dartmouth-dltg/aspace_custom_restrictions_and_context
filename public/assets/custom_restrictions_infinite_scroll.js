@@ -1,22 +1,20 @@
-class CustomRestrictionsInfiniteRecords extends CustomRestrictionsTreeBase {
+class CustomRestrictionsInfiniteScroll extends CustomRestrictionsTreeBase {
 
   constructor(repoUri, tree) {
     super(repoUri, tree);
   }
-
+  
   fullConfig() {
-    const infiniteRecordCfg = {
-      treeSelector: 'infinite-records-container',
-      infiniteTree: true,
-      isInfiniteRecord: true,
-      isInfiniteScroll: false,
-      nodeSelectorClass: 'infinite-record-record',
-      decoratorNodeSelector: '.infinite-item h3',
-      uriSelector: 'data-uri',
+    const infiniteScrollCfg = {
+      isInfiniteScroll: true,
+      treeSelector: 'infinite-record-wrapper',
+      nodeSelectorClass: 'record-title',
+      decoratorNodeSelector: 'a.recordTitle',
+      uriSelector: 'href',
     };
 
     const cfg = this.baseConfig();
-    return {...cfg, ...infiniteRecordCfg};
+    return {...cfg, ...infiniteScrollCfg};
   }
 
   // infinite record panes do not have an id to find, so we need to go with a class name
