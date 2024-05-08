@@ -32,7 +32,7 @@
             <div class="mini-tree-location">
               <div>
                 <div class="mini-tree-indicator">
-                  <%= loc['type'].nil? ? 'Container' : loc['type'].capitalize %> <%= loc['indicator']%>
+                  <%= loc['display_string']%>
                 </div>
                 <div class="mini-tree-locations">
                   <% loc['locations'].each do |place| %>

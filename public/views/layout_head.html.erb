@@ -6,6 +6,7 @@
   <%= javascript_include_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_tree_additions_pui.js" %>
   <%= javascript_include_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_infinite_tree.js" %>
   <%= javascript_include_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_infinite_records.js" %>
+  <%= javascript_include_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_infinite_scroll.js" %>
   <% 
 
     def is_search? 
@@ -59,18 +60,26 @@
       const puiSearchRestrictions = new CustomRestrictionsPui(`<%= raw ASUtils.to_json(custom_restrictions_object_data) %>`);
       puiSearchRestrictions.setupDecoratePuiSearch();
       <% unless AppConfig.has_key?(:aspace_custom_restrictions_pui_tree) && AppConfig[:aspace_custom_restrictions_pui_tree] == false %>
-        if (typeof tree !== 'undefined') {
-          const customTree = new CustomRestrictionsTree(tree);
-          customTree.initialize();
-        }
-        if (typeof infiniteTree !== 'undefined') {
-          const customInfiniteTree = new CustomRestrictionsInfiniteTree();
-          customInfiniteTree.initialize();
-        }
-         if (typeof infiniteRecords !== 'undefined') {
-          const customInfiniteRecords = new CustomRestrictionsInfiniteRecords();
-          customInfiniteRecords.initialize();
-        }
+        <% unless @result.nil? %>
+          <% unless @result.repository_information.nil? %>
+            if (typeof tree !== 'undefined' && tree instanceof LargeTree) {
+              const customTree = new CustomRestrictionsTree(`<%= raw @result.repository_information.dig('top','uri') %>`, tree);
+              customTree.initialize();
+            }
+            if (typeof scroll !== 'undefined' && scroll instanceof InfiniteScroll) {
+              const customInfiniteRecords = new CustomRestrictionsInfiniteScroll(`<%= raw @result.repository_information.dig('top','uri') %>`);
+              customInfiniteRecords.initialize();
+            }
+            if (typeof infiniteTree !== 'undefined' && infiniteTree instanceof InfiniteTree) {
+              const customInfiniteTree = new CustomRestrictionsInfiniteTree(`<%= raw @result.repository_information.dig('top','uri') %>`);
+              customInfiniteTree.initialize();
+            }
+            if (typeof infiniteRecords !== 'undefined' && infiniteRecords instanceof InfiniteRecords) {
+              const customInfiniteRecords = new CustomRestrictionsInfiniteRecords(`<%= raw @result.repository_information.dig('top','uri') %>`);
+              customInfiniteRecords.initialize();
+            }
+          <% end %>
+        <% end %>
       <% end %>
     });
   </script>

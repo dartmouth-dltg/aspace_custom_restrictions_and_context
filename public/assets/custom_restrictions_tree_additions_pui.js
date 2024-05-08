@@ -1,10 +1,17 @@
 class CustomRestrictionsTree extends CustomRestrictionsTreeBase {
 
-  constructor(repoId) {
-    super(repoId);
-    this.decoratorNodeSelector = 'a.record-title';
-    this.nodeSelectorClass = 'record-title';
-    this.uriSelector = 'href';
-    this.decoratorNodeSelector = '.infinite-item h3';
+  constructor(repoUri, tree) {
+    super(repoUri, tree);
+  }
+
+  fullConfig() {
+    const treeCfg = {
+      decoratorNodeSelector: 'a.record-title',
+      nodeSelectorClass: 'record-title',
+      uriSelector: 'href',
+    };
+
+    const cfg = this.baseConfig();
+    return {...cfg, ...treeCfg};
   }
 }

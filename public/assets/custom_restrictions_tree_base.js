@@ -1,17 +1,40 @@
 class CustomRestrictionsTreeBase {
 
-  constructor(repoId) {
-    this.repoId = repoId;
-    this.treeSelector = 'tree-container';
-    this.isInfiniteRecord = false;
-    this.nodeSelectorClass = '';
-    this.uriSelector = '';
-    this.decoratorNodeSelector = '';
-    this.mutationConfig = {
-      attributes: false,
-      childList: true,
-      subtree: true,
+  constructor(repoUri, tree) {
+    this.repoUri = repoUri;
+    this.cfg = this.fullConfig();
+    this.mutationCfg = this.mutationConfig();
+  }
+
+  baseConfig() {
+   return {
+      infiniteTree: false,
+      isInfiniteRecord: false,
+      isInfiniteScroll: false,
+      treeSelector: 'tree-container',
+      nodeSelectorClass: '',
+      uriSelector: '',
+      decoratorNodeSelector: '',
     };
+  }
+
+  fullConfig() {
+    // must implement in child class
+    console.log('Implement fullConfig() method in child class');
+  }
+
+  mutationConfig() {
+    return {
+      mutationConfig: {
+        attributes: false,
+        childList: true,
+        subtree: true,
+      },
+    };
+  }
+
+  config_overrides() {
+    // must be implemented in child class
   }
 
   puiInfiniteRecordWarning(data) {
@@ -23,16 +46,16 @@ class CustomRestrictionsTreeBase {
   }
 
   decorateTreeObject(data, el) {
-    if (Object.keys(data).length > 0) {
-      $(el).addClass('custom-restriction-tree-node');
-      if (this.isInfiniteRecord) {
-        $(el).append(this.puiInfiniteRecordWarning(data));
+    if (data.length > 0) {
+      el.addClass('custom-restriction-tree-node');
+      if (this.cfg.isInfiniteRecord) {
+        el.append(this.puiInfiniteRecordWarning(data));
       } else {
-        $(el).prepend(this.puiTreeWarning(data));
+        el.prepend(this.puiTreeWarning(data));
       }
     }
     else {
-      $(el).addClass('no-custom-restriction-tree-node');
+      el.addClass('no-custom-restriction-tree-node');
     }
   }
 
@@ -47,8 +70,8 @@ class CustomRestrictionsTreeBase {
       },
       method: 'post',
     }).done((data) => {
-      if (self.infiniteTree || self.isInfiniteRecord) {
-        el = el.find(self.decoratorNodeSelector);
+      if (self.cfg.infiniteTree || self.cfg.isInfiniteRecord) {
+        el = el.find(self.cfg.decoratorNodeSelector);
       }
       self.decorateTreeObject(data, el);
     }).fail(() => {
@@ -66,17 +89,24 @@ class CustomRestrictionsTreeBase {
       if (el.addedNodes && el.addedNodes.length > 0) {
         $(el.addedNodes).each((idx, el) => {
           let node = null;
-          if (self.isInfiniteRecord) {
+          if (self.cfg.isInfiniteRecord) {
             node = $(el);
           } else {
-            node = $(el).find(`.${self.nodeSelectorClass}`);
+            node = $(el).find(`.${self.cfg.nodeSelectorClass}`);
           }
-          if (node.hasClass(self.nodeSelectorClass) &&
+          if (node.hasClass(self.cfg.nodeSelectorClass) &&
             !node.hasClass('no-custom-restriction-tree-node') &&
             !node.hasClass('custom-restriction-tree-node')
           ) {
-            const dataUri = node.attr(self.uriSelector);
-            const type = `${dataUri.split('/')[3]}`;
+            let dataUri = node.attr(self.cfg.uriSelector);
+            let type = '';
+            if (dataUri.includes('::')) {
+              type = `${dataUri.split('::')[1].split('_').slice(0,-1).join('_')}s`;
+              const objectId = `${dataUri.split('::')[1].split('_').slice(-1)}`;
+              dataUri = `${self.repoUri}/${type}/${objectId}`;
+            } else {
+              type = `${dataUri.split('/')[3]}`;
+            }
             self.fetchTreeObjectJson(dataUri, type, node);
           }
         });
@@ -90,6 +120,6 @@ class CustomRestrictionsTreeBase {
       self.manipulateTree(mutationList);
     }
     const observer = new MutationObserver(manipTree);
-    observer.observe(document.getElementById(this.treeSelector), this.mutationConfig);
+    observer.observe(document.getElementById(this.cfg.treeSelector), this.mutationCfg.mutationConfig);
   }
 }

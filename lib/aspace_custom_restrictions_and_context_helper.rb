@@ -120,12 +120,16 @@ class AspaceCustomRestrictionsContextHelper
     containers = []
     instances.each do |inst|
       if inst['sub_container'] && inst['sub_container']['top_container'] && inst['sub_container']['top_container']['_resolved']
-        indicator = inst['sub_container']['top_container']['_resolved']['indicator']
+        display_string = inst['sub_container']['top_container']['_resolved']['display_string']
         type = inst['sub_container']['top_container']['_resolved']['type']
+
+        if type.nil?
+          display_string = "Container: " + display_string
+        end
+
         locations = parse_container_locations(inst['sub_container']['top_container']['_resolved']['container_locations'])
         containers << {
-          "indicator" => indicator, 
-          "type" => type, 
+          "display_string" => display_string,
           "locations" => locations
         }
       end

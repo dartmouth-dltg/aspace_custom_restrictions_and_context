@@ -54,7 +54,7 @@
               places << place
             end
             locations << {
-              'type' => loc['type'].nil? ? 'Container' : "#{loc['type'].capitalize} #{loc['indicator']}",
+              'display_string' => loc['display_string'],
               'places' => places
             }
           end
@@ -66,24 +66,26 @@
         end
       end
     end
-  %>
+  end
+%>
 
-  <% unless current_repo.nil? %>
-    <script>
-      $().ready(() => {
+<% unless current_repo.nil? %>
+  <script>
+    $().ready(() => {
+      <% unless AppConfig.has_key?(:aspace_custom_restrictions_sui_search_enhance) && AppConfig[:aspace_custom_restrictions_sui_search_enhance] == false %>
         <% if search_page? || is_accession_idx? || is_digital_object_idx? || is_resource_idx? %>
           const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>, `<%= raw ASUtils.to_json(custom_restrictions_object_data) %>`);
           objectDecorator.decorateSearchTypes();
         <% else %>
           const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
         <% end %>
-        <% unless AppConfig.has_key?(:aspace_custom_restrictions_staff_tree) && AppConfig[:aspace_custom_restrictions_staff_tree] == false %>
-          if (typeof tree !== 'undefined') {
-            const customTree = new CustomRestrictionsTree(`<%= current_repo.id %>`);
-            customTree.initialize();
-          }
-        <% end %>
-      });
-    </script>
-  <% end %>
+      <% end %>
+      <% unless AppConfig.has_key?(:aspace_custom_restrictions_staff_tree) && AppConfig[:aspace_custom_restrictions_staff_tree] == false %>
+        if (typeof tree !== 'undefined') {
+          const customTree = new CustomRestrictionsTree(`<%= current_repo.id %>`);
+          customTree.initialize();
+        }
+      <% end %>
+    });
+  </script>
 <% end %>
