@@ -1,14 +1,15 @@
 class IndexerCommon
 
   @custom_restriction_resolves = [
-    'top_container',
-    'top_container::container_locations',
     'ancestors',
     'ancestors::instances::top_container',
     'ancestors::instances::top_container::container_locations',
-    'digital_object'
+    'digital_object',
+    'top_container',
+    'top_container::container_locations'
   ]
   @@resolved_attributes += @custom_restriction_resolves
+  AppConfig[:record_inheritance_resolves] += @custom_restriction_resolves
 
   add_indexer_initialize_hook do |indexer|
     indexer.add_document_prepare_hook {|doc, record|
@@ -46,9 +47,7 @@ class IndexerCommon
   end
 
   def self.resolve_ancestors_for_pui(record)
-    enhanced_record = JSONModel::HTTP.get_json(record['uri'], 'resolve[]' => @custom_restriction_resolves)
-
-    enhanced_record
+    JSONModel::HTTP.get_json(record['uri'], 'resolve[]' => @custom_restriction_resolves)
   end
 
   def self.get_restrictions(record)
