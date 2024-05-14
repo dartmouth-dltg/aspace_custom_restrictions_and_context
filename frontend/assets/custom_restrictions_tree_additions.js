@@ -50,16 +50,24 @@ class CustomRestrictionsTree {
         return;
       }
       if (el.addedNodes && el.addedNodes.length > 0) {
-        $(el.addedNodes[0]).find(self.nodeSelector).each((idx, el) => {
-          const node = $(el);
-          if (!node.hasClass('no-custom-restriction-tree-node') && !node.hasClass('custom-restriction-tree-node')) {
+        $(el.addedNodes).each((idx, el) => {
+
+          const node = $(el).find(self.nodeSelector);
+          if (node.length < 1) {
+            return;
+          }
+
+          if (
+            !node.hasClass('no-custom-restriction-tree-node') &&
+            !node.hasClass('custom-restriction-tree-node')
+          ) {
             const href = node.attr('href');
             const uriParts = href.split("::").slice(-1).join('');
             const idAndType = uriParts.split("_");
             const id = idAndType.slice(-1).join('');
             const type = `${idAndType.slice(0, -1).join('_')}s`;
 
-            self.fetchTreeObjectJson(id, type, el);
+            self.fetchTreeObjectJson(id, type, node);
           }
         });
       }
