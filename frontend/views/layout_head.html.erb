@@ -1,7 +1,6 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-<%= stylesheet_link_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.css" %>
-<%= javascript_include_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.js" %>
-<%= javascript_include_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_tree_additions.js" %>
+<%= stylesheet_link_tag "#{AppConfig[:frontend_proxy_prefix]}assets/#{AppConfig[:aspace_custom_restrictions_sui_assets_filename]}.css" %>
+<%= javascript_include_tag "#{AppConfig[:frontend_proxy_prefix]}assets/#{AppConfig[:aspace_custom_restrictions_sui_assets_filename]}.js" %>
 
 <% unless AppConfig.has_key?(:aspace_custom_restrictions_sui_search_enhance) && AppConfig[:aspace_custom_restrictions_sui_search_enhance] == false %>
   <%
