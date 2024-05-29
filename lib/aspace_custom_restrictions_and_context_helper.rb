@@ -79,9 +79,9 @@ class AspaceCustomRestrictionsContextHelper
         if AppConfig.has_key?(:aspace_custom_restrictions_access_note_skip_phrases) && AppConfig[:aspace_custom_restrictions_access_note_skip_phrases].kind_of?(Array)
           unless note['subnotes'].nil?
             note['subnotes'].each do |subnote|
-              break if !has_local_access_restriction
+              break unless has_local_access_restriction
               AppConfig[:aspace_custom_restrictions_access_note_skip_phrases].each do |skip_phrase|
-                break if !has_local_access_restriction
+                break unless has_local_access_restriction
                 unless subnote['content'].nil?
                   if subnote['content'].downcase.include?(skip_phrase.downcase)
                     has_local_access_restriction = false
