@@ -1,4 +1,4 @@
-# WIP: Custom Restrictions and Context
+# Aspace Custom Restrictions and Context
 
 ## About
 
@@ -135,10 +135,17 @@ list, make sure that you also add translations in `frontend/locales/enums`.
 
 ## Note
 
+### Performance
+
 In order to make this plugin useful for multiple versions of ArchivesSpace and to limit maintenance of
 multiple versions, the plugin uses javascript to enhance the tree layouts and makes one additional request 
 per tree object. Depending on the resources available to your ArchivesSpace instance, you may notice some
 performance impacts.
+
+### Asset Aggregation
+
+The css and javascript files are aggregated on startup for both the pui and staff interfaces to prevent
+cache issues.
 
 ## Credits
 
