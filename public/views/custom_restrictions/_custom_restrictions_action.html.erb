@@ -2,16 +2,10 @@
   restrictions = ''
   raw_restrictions = record.raw['custom_restrictions_u_sstr'].nil? ? {} : ASUtils.json_parse(record.raw['custom_restrictions_u_sstr'].first)
   raw_restrictions.each do |level, restriction|
-    begin
-      restriction_message = I18n.t('enumerations.custom_restriction_type.' + restriction, :raise => I18n::MissingTranslationData)
-    rescue I18n::MissingTranslationData
-      restriction_message = I18n.t('enumerations.custom_restriction_type.default')
-    end
+    restriction_message = I18n.t('enumerations.custom_restriction_type.' + restriction, default:  I18n.t('enumerations.custom_restriction_type.default'))
     restrictions = I18n.t('custom_restrictions_and_context.restriction_label', 
-                    {
-                      :level => level.titleize,
-                      :restriction => restriction_message
-                    }
+                      level: level.titleize,
+                      restriction: restriction_message
                   )
   end
 %>

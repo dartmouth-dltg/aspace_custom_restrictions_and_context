@@ -14,6 +14,10 @@ class CustomRestrictionsInfiniteTree extends CustomRestrictionsTreeBase {
     };
 
     const cfg = this.baseConfig();
+    if (document.getElementById(infiniteTreeCfg.treeSelector) === null) {
+      infiniteTreeCfg.treeSelector = 'infinite-tree-container';
+    }
+
     return {...cfg, ...infiniteTreeCfg};
   }
 }

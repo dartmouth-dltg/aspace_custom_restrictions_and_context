@@ -35,16 +35,10 @@ class CustomRestrictionsPuiController < ApplicationController
         if restrictions.empty?
           render :json => {}
         else
-          begin
-            restriction_type = I18n.t('enumerations.custom_restriction_type.' + restrictions.values.first, :raise => I18n::MissingTranslationData)
-          rescue I18n::MissingTranslationData
-            restriction_type = I18n.t('enumerations.custom_restriction_type.default')
-          end
+          restriction_type = I18n.t('enumerations.custom_restriction_type.' + restrictions.values.first, default: I18n.t('enumerations.custom_restriction_type.default'))
           restriction_message = I18n.t('custom_restrictions_and_context.restriction_label', 
-                            {
-                              :level => restrictions.keys.first.titleize,
-                              :restriction => restriction_type
-                            }
+                              level: restrictions.keys.first.titleize,
+                              restriction: restriction_type
                           )
           render :json => ASUtils.to_json(restriction_message)
         end

@@ -60,10 +60,8 @@ class CustomRestrictionsController < ApplicationController
       translated_restrictions = []
       @restrictions.each do |level, restriction|
         translated_restrictions << I18n.t('custom_restrictions_and_context.restriction_label', 
-          {
-            :level => level.titleize,
-            :restriction => I18n.t('enumerations.custom_restriction_type.' + restriction, I18n.t('enumerations.custom_restriction_type.default'))
-          }
+          level: level.titleize,
+          restriction: I18n.t('enumerations.custom_restriction_type.' + restriction, default: I18n.t('enumerations.custom_restriction_type.default'))
         )
       end
       render :json => ASUtils.to_json(translated_restrictions)

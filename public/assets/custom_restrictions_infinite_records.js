@@ -25,7 +25,8 @@ class CustomRestrictionsInfiniteRecords extends CustomRestrictionsTreeBase {
     const manipTree = (mutationList, observer) => {
       self.manipulateTree(mutationList);
     }
+
     const observer = new MutationObserver(manipTree);
-    observer.observe(document.getElementsByClassName(this.cfg.treeSelector)[0], this.mutationCfg.mutationConfig);
+    observer.observe(document.getElementById(this.cfg.treeSelector), this.mutationCfg.mutationConfig);
   }
 }

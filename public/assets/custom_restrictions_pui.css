@@ -1,4 +1,6 @@
-.aspace-custom-restrictions.label {
+.aspace-custom-restrictions.label,
+.custom-restriction-tree-node .label {
+  color: #fff;
   font-size: 0.9rem;
 }
 

@@ -38,7 +38,7 @@ class CustomRestrictionsTreeBase {
   }
 
   puiInfiniteRecordWarning(data) {
-    return `<span class="label label-danger">${data}</span>`
+    return `<span class="label bg-danger badge">${data}</span>`
   }
 
   puiTreeWarning(data) {

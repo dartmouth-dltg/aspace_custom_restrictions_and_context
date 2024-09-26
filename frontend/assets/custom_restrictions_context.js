@@ -14,7 +14,7 @@ class CustomRestrictionsAndContext {
   }
 
   restrictionTypeSnippet(restrictionType) {
-    return `<div id="custom-restriction" class="label label-danger">${restrictionType}</div>`;
+    return `<div id="custom-restriction" class="label bg-danger badge">${restrictionType}</div>`;
   }
 
   displayRestriction(restrictionType) {
