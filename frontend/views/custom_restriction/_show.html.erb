@@ -6,7 +6,7 @@
   <%= readonly_context(:custom_restriction, custom_restriction) do |readonly| %>
     <div class="subrecord-form-container">
       <div class="subrecord-form-fields">
-        <%= readonly.label_with_field "custom_restriction_type", ('custom_restriction_type' && I18n.t('enumerations.custom_restriction_type.' + custom_restriction['custom_restriction_type'], custom_restriction['custom_restriction_type'])) %>
+        <%= readonly.label_with_field "custom_restriction_type", ('custom_restriction_type' && I18n.t('enumerations.custom_restriction_type.' + custom_restriction['custom_restriction_type'], default: custom_restriction['custom_restriction_type'])) %>
       </div>
     </div>
   <% end %>

@@ -2,6 +2,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   <%= stylesheet_link_tag "#{AppConfig[:public_proxy_prefix]}assets/#{AppConfig[:aspace_custom_restrictions_pui_assets_filename]}.css" %>
   <%= javascript_include_tag "#{AppConfig[:public_proxy_prefix]}assets/#{AppConfig[:aspace_custom_restrictions_pui_assets_filename]}.js" %>
+  
   <% 
 
     def is_search? 
@@ -27,16 +28,10 @@
 
             raw_restrictions = result['custom_restrictions_u_sstr'].nil? ? {} : ASUtils.json_parse(result['custom_restrictions_u_sstr'].first)
             raw_restrictions.each do |level, restriction|
-              begin
-                restriction_message = I18n.t('enumerations.custom_restriction_type.' + restriction, :raise => I18n::MissingTranslationData)
-              rescue I18n::MissingTranslationData
-                restriction_message = I18n.t('enumerations.custom_restriction_type.default')
-              end
+              restriction_message = I18n.t('enumerations.custom_restriction_type.' + restriction, default: I18n.t('enumerations.custom_restriction_type.default'))
               restrictions << I18n.t('custom_restrictions_and_context.restriction_label', 
-                                {
-                                  :level => level.titleize,
-                                  :restriction => restriction_message
-                                }
+                                  level: level.titleize,
+                                  restriction: restriction_message
                               )
             end
             
@@ -57,21 +52,29 @@
       <% unless AppConfig.has_key?(:aspace_custom_restrictions_pui_tree) && AppConfig[:aspace_custom_restrictions_pui_tree] == false %>
         <% unless @result.nil? %>
           <% unless @result.repository_information.nil? %>
-            if (typeof tree !== 'undefined' && tree instanceof LargeTree) {
-              const customTree = new CustomRestrictionsTree(`<%= raw @result.repository_information.dig('top','uri') %>`, tree);
-              customTree.initialize();
+            if (typeof tree !== 'undefined' && typeof LargeTree !== 'undefined') {
+              if (tree instanceof LargeTree) {
+                const customTree = new CustomRestrictionsTree(`<%= raw @result.repository_information.dig('top','uri') %>`, tree);
+                customTree.initialize();
+              }
             }
-            if (typeof scroll !== 'undefined' && scroll instanceof InfiniteScroll) {
-              const customInfiniteRecords = new CustomRestrictionsInfiniteScroll(`<%= raw @result.repository_information.dig('top','uri') %>`);
-              customInfiniteRecords.initialize();
+            if (typeof scroll !== 'undefined' && typeof InfiniteScroll !== 'undefined') {
+              if (scroll instanceof InfiniteScroll) {
+                const customInfiniteRecords = new CustomRestrictionsInfiniteScroll(`<%= raw @result.repository_information.dig('top','uri') %>`);
+                customInfiniteRecords.initialize();
+              }
             }
-            if (typeof infiniteTree !== 'undefined' && infiniteTree instanceof InfiniteTree) {
-              const customInfiniteTree = new CustomRestrictionsInfiniteTree(`<%= raw @result.repository_information.dig('top','uri') %>`);
-              customInfiniteTree.initialize();
+            if (typeof infiniteTree !== 'undefined' && typeof InfiniteTree !== 'undefined') {
+              if (infiniteTree instanceof InfiniteTree) {
+                const customInfiniteTree = new CustomRestrictionsInfiniteTree(`<%= raw @result.repository_information.dig('top','uri') %>`);
+                customInfiniteTree.initialize();
+              }
             }
-            if (typeof infiniteRecords !== 'undefined' && infiniteRecords instanceof InfiniteRecords) {
-              const customInfiniteRecords = new CustomRestrictionsInfiniteRecords(`<%= raw @result.repository_information.dig('top','uri') %>`);
-              customInfiniteRecords.initialize();
+            if (typeof infiniteRecords !== 'undefined' && typeof InfiniteRecords !== 'undefined') {
+              if (infiniteRecords instanceof InfiniteRecords) {
+                const customInfiniteRecords = new CustomRestrictionsInfiniteRecords(`<%= raw @result.repository_information.dig('top','uri') %>`);
+                customInfiniteRecords.initialize();
+              }
             }
           <% end %>
         <% end %>

@@ -6,7 +6,7 @@ class CustomRestrictionsPui {
   }
 
   puiRestrictionTemplate(data) {
-    return `<span class="aspace-custom-restrictions label label-danger">${data}</span>`;
+    return `<span class="aspace-custom-restrictions label bg-danger badge">${data}</span>`;
   }
 
   decoratePuiSearch(target, dataUri) {

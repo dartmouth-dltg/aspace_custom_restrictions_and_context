@@ -11,20 +11,6 @@ Rails.application.config.after_initialize do
     Plugins::add_search_base_facets('custom_restrictions_u_sbool')
   end
 
-  ActionView::PartialRenderer.class_eval do
-    alias_method :render_custom_restrictions, :render
-    def render(context, options, block)
-      result = render_custom_restrictions(context, options, block);
-
-      # Add our location-specific templates to shared/templates
-      if options[:partial] == "shared/templates"
-        result += render(context, options.merge(:partial => "js_templates/templates"), nil)
-      end
-
-      result
-    end
-  end
-
   # aggregate css & js on each restart - assume it will mean some css or js changes to local files
   plugin_directory = File.expand_path(File.dirname(__FILE__))
 
