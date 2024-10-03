@@ -27,15 +27,15 @@ en:
 
   advanced_search:
     text:
-      custom_restrictions_u_sbool: Has Restrictions
+      custom_restrictions_u_sbool: Has Custom Restrictions
 
   search:
     multi:
-      custom_restrictions_u_sbool: Has Restrictions
+      custom_restrictions_u_sbool: Has Custom Restrictions
 
   search_results:
     filter:
-      custom_restrictions_u_sbool: Has Restrictions
+      custom_restrictions_u_sbool: Has Custom Restrictions
     filter_terms:
       custom_restrictions_u_sbool:
         "true": "Yes"
