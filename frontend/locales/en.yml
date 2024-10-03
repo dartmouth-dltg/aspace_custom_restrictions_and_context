@@ -24,3 +24,20 @@ en:
 
   enumeration_names:
     custom_restriction_type: Custom Restriction Type
+
+  advanced_search:
+    text:
+      custom_restrictions_u_sbool: Has Restrictions
+
+  search:
+    multi:
+      custom_restrictions_u_sbool: Has Restrictions
+
+  search_results:
+    filter:
+      custom_restrictions_u_sbool: Has Restrictions
+    filter_terms:
+      custom_restrictions_u_sbool:
+        "true": "Yes"
+        "false": "No"
+
