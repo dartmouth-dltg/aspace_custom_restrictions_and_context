@@ -5,6 +5,10 @@ require_relative '../lib/css_js_compile'
 
 Rails.application.config.after_initialize do
 
+  if AppConfig[:plugins].include?('aspace_custom_restrictions_and_context')
+    Plugins::add_search_base_facets('custom_restrictions_u_sbool')
+  end
+
   ActionView::PartialRenderer.class_eval do
     alias_method :render_custom_restrictions, :render
     def render(context, options, block)

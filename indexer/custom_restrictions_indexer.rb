@@ -14,6 +14,7 @@ class IndexerCommon
   add_indexer_initialize_hook do |indexer|
     indexer.add_document_prepare_hook {|doc, record|
       record_data = record['record']
+      doc['custom_restrictions_u_sbool'] = nil
       case doc['primary_type']
       when 'accession'
         unless AspaceCustomRestrictionsContextHelper.get_location(record_data).nil?
@@ -42,6 +43,9 @@ class IndexerCommon
           doc['custom_restrictions_locations_u_sstr'] = ASUtils.to_json(AspaceCustomRestrictionsContextHelper.get_location(record_data))
         end
           doc['custom_restrictions_u_sstr'] = ASUtils.to_json(toplevel_restriction(record_data))
+      end
+      if doc['custom_restrictions_u_sstr'] && ASUtils.json_parse(doc['custom_restrictions_u_sstr']).length > 0
+        doc['custom_restrictions_u_sbool'] = true
       end
     }
   end

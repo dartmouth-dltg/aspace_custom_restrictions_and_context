@@ -94,9 +94,12 @@ class CustomRestrictionsAndContext {
   }
 
   displaySearchEnhancements(id, target) {
-    const self = this;
+    const self = this;    
     const restrictionData = JSON.parse(this.searchRestrictionsData)[`${id}`];
 
+    if (typeof restrictionData === 'undefined') {
+      return;
+    }
     const crTemplate = AS.renderTemplate("template_custom_restrictions_search_enhance", {
       restrictions: restrictionData['custom_restrictions'],
       locations: restrictionData['custom_locations']
