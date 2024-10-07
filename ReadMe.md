@@ -84,6 +84,10 @@ and
 ```
 AppConfig[:aspace_custom_restrictions_pui_tree] = false
 ```
+Staff faceting is alos optional and defaults to off. To turn it on, set
+```
+AppConfig[:aspace_custom_restrictions_faceting] = true
+```
 
 ## Enhancements
 
