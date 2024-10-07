@@ -5,7 +5,9 @@ require_relative '../lib/css_js_compile'
 
 Rails.application.config.after_initialize do
 
-  if AppConfig[:plugins].include?('aspace_custom_restrictions_and_context')
+  if AppConfig[:plugins].include?('aspace_custom_restrictions_and_context') &&
+      AppConfig.has_key?(:aspace_custom_restrictions_faceting) &&
+      AppConfig[:aspace_custom_restrictions_faceting]
     Plugins::add_search_base_facets('custom_restrictions_u_sbool')
   end
 

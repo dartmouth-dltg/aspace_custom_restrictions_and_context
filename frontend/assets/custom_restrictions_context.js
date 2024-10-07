@@ -94,7 +94,7 @@ class CustomRestrictionsAndContext {
   }
 
   displaySearchEnhancements(id, target) {
-    const self = this;    
+    const self = this;
     const restrictionData = JSON.parse(this.searchRestrictionsData)[`${id}`];
 
     if (typeof restrictionData === 'undefined') {
