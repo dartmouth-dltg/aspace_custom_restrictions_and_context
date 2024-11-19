@@ -1,2 +1,3 @@
 .DS_Store
-aspace_custom_restrictions_and_context-*
+frontend/assets/aspace_custom_restrictions_and_context-*
+public/assets/aspace_custom_restrictions_and_context-*
