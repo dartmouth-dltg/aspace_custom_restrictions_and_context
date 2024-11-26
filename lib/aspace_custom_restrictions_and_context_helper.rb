@@ -181,10 +181,14 @@ class AspaceCustomRestrictionsContextHelper
     locations = {} 
     context_tree = ''
 
-    obj_data = JSONModel::HTTP.get_json('/search/records', 'uri[]' => uri)
+    params = {"filter_term[]" => [{"uri" => uri}.to_json], "q" => "*", "resolve[]" => ["ancestors:id@dartmouth_compact_resource"]}
+    repo = JSONModel.parse_reference(uri)[:repository]
+    repo_id = JSONModel.parse_reference(repo)[:id]
 
-    unless obj_data.fetch('results', []).empty?
-      record = obj_data.fetch('results').fetch(0)
+    obj_data = Search.all(repo_id, params)["results"]
+
+    unless obj_data.empty?
+      record = obj_data.first
     end
 
     unless record.nil?

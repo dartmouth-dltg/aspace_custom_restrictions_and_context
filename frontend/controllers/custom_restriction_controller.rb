@@ -27,9 +27,14 @@ class CustomRestrictionsController < ApplicationController
 
     unless id.empty?
 
-      results = JSONModel::HTTP.get_json('/search/records', 'uri[]' => uri)
-      unless results.fetch('results', []).empty?
-        record = results.fetch('results').fetch(0)
+      params = {"filter_term[]" => [{"uri" => uri}.to_json], "q" => "*", "resolve[]" => ["ancestors:id@dartmouth_compact_resource"]}
+      repo = JSONModel.parse_reference(uri)[:repository]
+      repo_id = JSONModel.parse_reference(repo)[:id]
+  
+      results = Search.all(repo_id, params)["results"]
+
+      unless results.empty?
+        record = results.first
       end
 
       unless record.nil?
