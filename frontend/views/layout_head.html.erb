@@ -17,15 +17,15 @@
     end
 
     def is_resource_idx? 
-      controller.controller_name == "resources" && controller.action_name = "index"
+      controller.controller_name == "resources" && controller.action_name == "index"
     end
 
     def is_accession_idx? 
-      controller.controller_name == "accessions" && controller.action_name = "index"
+      controller.controller_name == "accessions" && controller.action_name == "index"
     end
 
     def is_digital_object_idx? 
-      controller.controller_name == "digital_objects" && controller.action_name = "index"
+      controller.controller_name == "digital_objects" && controller.action_name == "index"
     end
 
   %>
