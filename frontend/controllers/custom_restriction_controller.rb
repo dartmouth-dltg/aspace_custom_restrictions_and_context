@@ -25,19 +25,28 @@ class CustomRestrictionsController < ApplicationController
     @location = []
     @restrictions = {}
 
-    unless id.empty?
+    if id.empty?
+      if restrictions_only
+        render :json => ASUtils.to_json([])
+      end
+    else
 
       params = {"filter_term[]" => [{"uri" => uri}.to_json], "q" => "*", "resolve[]" => ["ancestors:id@dartmouth_compact_resource"]}
       repo = JSONModel.parse_reference(uri)[:repository]
       repo_id = JSONModel.parse_reference(repo)[:id]
-  
+
       results = Search.all(repo_id, params)["results"]
 
       unless results.empty?
         record = results.first
       end
 
-      unless record.nil?
+      if record.nil?
+        if restrictions_only
+          render :json => ASUtils.to_json([])
+        end
+      else
+
         @restrictions = record['custom_restrictions_u_sstr'].nil? ? {} : ASUtils.json_parse(record['custom_restrictions_u_sstr'].fetch(0))
 
         unless restrictions_only
@@ -56,24 +65,24 @@ class CustomRestrictionsController < ApplicationController
           end
         end
 
-      end
-    end
+        @restrictions = AspaceCustomRestrictionsContextHelper.restriction_applies_to_object?(record, @restrictions)
 
-    @restrictions = AspaceCustomRestrictionsContextHelper.restriction_applies_to_object?(record, @restrictions)
+        if restrictions_only
+          translated_restrictions = []
+          @restrictions.each do |level, restriction|
+            translated_restrictions << I18n.t('custom_restrictions_and_context.restriction_label', 
+              {
+                :level => level.titleize,
+                :restriction => I18n.t('enumerations.custom_restriction_type.' + restriction, I18n.t('enumerations.custom_restriction_type.default'))
+              }
+            )
+          end
 
-    if restrictions_only
-      translated_restrictions = []
-      @restrictions.each do |level, restriction|
-        translated_restrictions << I18n.t('custom_restrictions_and_context.restriction_label', 
-          {
-            :level => level.titleize,
-            :restriction => I18n.t('enumerations.custom_restriction_type.' + restriction, I18n.t('enumerations.custom_restriction_type.default'))
-          }
-        )
+          render :json => ASUtils.to_json(translated_restrictions)
+        else
+          render_aspace_partial :partial => "mini_tree/context"
+        end
       end
-      render :json => ASUtils.to_json(translated_restrictions)
-    else
-      render_aspace_partial :partial => "mini_tree/context"
     end
   end
 

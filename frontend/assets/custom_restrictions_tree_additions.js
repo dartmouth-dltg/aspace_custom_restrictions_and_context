@@ -39,7 +39,7 @@ class CustomRestrictionsTree {
     }).done((data) => {
       self.decorateTreeObject(data, el);
     }).fail(() => {
-      console.log('Error fetching object json');
+      console.log('Error fetching tree object json');
     });
   }
   
