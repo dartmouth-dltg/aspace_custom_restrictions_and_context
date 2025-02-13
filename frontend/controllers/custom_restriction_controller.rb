@@ -31,7 +31,7 @@ class CustomRestrictionsController < ApplicationController
       end
     else
 
-      params = {"filter_term[]" => [{"uri" => uri}.to_json], "q" => "*", "resolve[]" => ["ancestors:id@dartmouth_compact_resource"]}
+      params = {"filter_term[]" => [{"uri" => uri}.to_json], "q" => "*", "resolve[]" => ["ancestors:id@custom_restrictions_compact_resource"]}
       repo = JSONModel.parse_reference(uri)[:repository]
       repo_id = JSONModel.parse_reference(repo)[:id]
 
@@ -71,10 +71,8 @@ class CustomRestrictionsController < ApplicationController
           translated_restrictions = []
           @restrictions.each do |level, restriction|
             translated_restrictions << I18n.t('custom_restrictions_and_context.restriction_label', 
-              {
                 :level => level.titleize,
-                :restriction => I18n.t('enumerations.custom_restriction_type.' + restriction, I18n.t('enumerations.custom_restriction_type.default'))
-              }
+                :restriction => I18n.t('enumerations.custom_restriction_type.' + restriction, default: I18n.t('enumerations.custom_restriction_type.default'))
             )
           end
 
