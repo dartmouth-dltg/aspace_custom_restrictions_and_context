@@ -31,7 +31,7 @@ class CustomRestrictionsController < ApplicationController
       end
     else
 
-      params = {"filter_term[]" => [{"uri" => uri}.to_json], "q" => "*", "resolve[]" => ["ancestors:id@dartmouth_compact_resource"]}
+      params = {"filter_term[]" => [{"uri" => uri}.to_json], "q" => "*", "resolve[]" => ["ancestors:id@custom_restrictions_compact_resource"]}
       repo = JSONModel.parse_reference(uri)[:repository]
       repo_id = JSONModel.parse_reference(repo)[:id]
 
