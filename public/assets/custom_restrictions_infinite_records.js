@@ -22,11 +22,11 @@ class CustomRestrictionsInfiniteRecords extends CustomRestrictionsTreeBase {
   // infinite record panes do not have an id to find, so we need to go with a class name
   initialize() {
     const self = this;
-    const manipTree = (mutationList, observer) => {
+    const manipTree = (mutationList, infiniteRecordsObserver) => {
       self.manipulateTree(mutationList);
     }
 
-    const observer = new MutationObserver(manipTree);
-    observer.observe(document.getElementById(this.cfg.treeSelector), this.mutationCfg.mutationConfig);
+    const infiniteRecordsObserver = new MutationObserver(manipTree);
+    infiniteRecordsObserver.observe(document.getElementById(this.cfg.treeSelector), this.mutationCfg.mutationConfig);
   }
 }

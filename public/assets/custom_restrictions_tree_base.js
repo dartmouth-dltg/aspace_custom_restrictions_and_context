@@ -15,6 +15,9 @@ class CustomRestrictionsTreeBase {
       nodeSelectorClass: '',
       uriSelector: '',
       decoratorNodeSelector: '',
+      rootNodeSelector: 'root-row',
+      hasRestrictionsClass: 'custom-restriction-tree-node',
+      noRestrictionsClass: 'no-custom-restriction-tree-node',
     };
   }
 
@@ -47,7 +50,7 @@ class CustomRestrictionsTreeBase {
 
   decorateTreeObject(data, el) {
     if (data.length > 0) {
-      el.addClass('custom-restriction-tree-node');
+      el.addClass(this.cfg.hasRestrictionsClass);
       if (this.cfg.isInfiniteRecord) {
         el.append(this.puiInfiniteRecordWarning(data));
       } else {
@@ -55,7 +58,7 @@ class CustomRestrictionsTreeBase {
       }
     }
     else {
-      el.addClass('no-custom-restriction-tree-node');
+      el.addClass(this.cfg.noRestrictionsClass);
     }
   }
 
@@ -70,6 +73,7 @@ class CustomRestrictionsTreeBase {
       },
       method: 'post',
     }).done((data) => {
+
       if (self.cfg.infiniteTree || self.cfg.isInfiniteRecord) {
         el = el.find(self.cfg.decoratorNodeSelector);
       }
@@ -78,37 +82,61 @@ class CustomRestrictionsTreeBase {
       console.log('Error fetching object json');
     });
   }
+
+  calcType(dataUri) {
+    let type = '';
+    if (dataUri.includes('::')) {
+      type = `${dataUri.split('::')[1].split('_').slice(0,-1).join('_')}s`;
+    } else {
+      type = `${dataUri.split('/')[3]}`;
+    }
+
+    return type;
+  }
+
+  checkUri(dataUri) {
+    if (dataUri.includes('::')) {
+      const objectId = `${dataUri.split('::')[1].split('_').slice(-1)}`;
+      dataUri = `${this.repoUri}/${type}/${objectId}`;
+    }
+
+    return dataUri;
+  }
+
+  getNodeData(el, mutate = true) {
+    let node = null;
+
+    if (mutate) {
+      if (this.cfg.isInfiniteRecord || this.cfg.infiniteTree) {
+        node = $(el);
+      } else {
+        node = $(el).find(`.${this.cfg.nodeSelectorClass}`).first();
+      }
+    } else {
+      node = $(el);
+    }
+    if (node.hasClass(this.cfg.nodeSelectorClass) &&
+      !node.hasClass(this.cfg.noRestrictionsClass) &&
+      !node.hasClass(this.cfg.hasRestrictionsClass) &&
+      !node.find(`a.${this.cfg.hasRestrictionsClass}`).length > 0 &&
+      !node.find(`a.${this.cfg.noRestrictionsClass}`).length > 0
+    ) {
+      const initialDataUri = node.attr(this.cfg.uriSelector);
+      const dataUri = this.checkUri(initialDataUri);
+      const type = this.calcType(initialDataUri);
+      this.fetchTreeObjectJson(dataUri, type, node);
+    }
+  }
   
   manipulateTree(mutationList) {
     const self = this;
-    let nodes = null;
     mutationList.forEach((el) => {
       if (el.type !== 'childList') {
         return;
       }
       if (el.addedNodes && el.addedNodes.length > 0) {
         $(el.addedNodes).each((idx, el) => {
-          let node = null;
-          if (self.cfg.isInfiniteRecord) {
-            node = $(el);
-          } else {
-            node = $(el).find(`.${self.cfg.nodeSelectorClass}`);
-          }
-          if (node.hasClass(self.cfg.nodeSelectorClass) &&
-            !node.hasClass('no-custom-restriction-tree-node') &&
-            !node.hasClass('custom-restriction-tree-node')
-          ) {
-            let dataUri = node.attr(self.cfg.uriSelector);
-            let type = '';
-            if (dataUri.includes('::')) {
-              type = `${dataUri.split('::')[1].split('_').slice(0,-1).join('_')}s`;
-              const objectId = `${dataUri.split('::')[1].split('_').slice(-1)}`;
-              dataUri = `${self.repoUri}/${type}/${objectId}`;
-            } else {
-              type = `${dataUri.split('/')[3]}`;
-            }
-            self.fetchTreeObjectJson(dataUri, type, node);
-          }
+          self.getNodeData(el)
         });
       }
     });
@@ -116,10 +144,36 @@ class CustomRestrictionsTreeBase {
 
   initialize() {
     const self = this;
-    const manipTree = (mutationList, observer) => {
+    // add any restrictions on load
+    $().ready(() => {
+      let initialNodes = $(`#${self.cfg.treeSelector}`).find(`.${self.cfg.nodeSelectorClass}`);
+      // all sorts of special for infinite tree
+      // is there a better way to wait for the tree to load?
+      if (this.cfg.infiniteTree) {
+        setTimeout(() => {
+          const rootNode = $(`#${self.cfg.treeSelector}`).find('.root-row');
+          rootNode.addClass(self.cfg.nodeSelectorClass);
+          self.getNodeData(rootNode, false);
+          initialNodes = $(`#${self.cfg.treeSelector}`)
+            .find(`.${self.cfg.nodeSelectorClass}`)
+            .not(`.${self.cfg.rootNodeSelector}`)
+            .not(`.${self.cfg.hasRestrictionsClass}`)
+            .not(`.${self.cfg.noRestrictionsClass}`);
+          initialNodes.each((idx, el) => {
+            self.getNodeData(el, false);
+          });
+        }, 1000)
+      } else {
+        initialNodes.each((idx, el) => {
+          self.getNodeData(el, false);
+        });
+      }
+    });
+
+    const manipTree = (mutationList, baseObserver) => {
       self.manipulateTree(mutationList);
     }
-    const observer = new MutationObserver(manipTree);
-    observer.observe(document.getElementById(this.cfg.treeSelector), this.mutationCfg.mutationConfig);
+    const baseObserver = new MutationObserver(manipTree);
+    baseObserver.observe(document.getElementById(this.cfg.treeSelector), this.mutationCfg.mutationConfig);
   }
 }
