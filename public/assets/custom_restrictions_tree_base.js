@@ -145,30 +145,28 @@ class CustomRestrictionsTreeBase {
   initialize() {
     const self = this;
     // add any restrictions on load
-    $().ready(() => {
-      let initialNodes = $(`#${self.cfg.treeSelector}`).find(`.${self.cfg.nodeSelectorClass}`);
-      // all sorts of special for infinite tree
-      // is there a better way to wait for the tree to load?
-      if (this.cfg.infiniteTree) {
-        setTimeout(() => {
-          const rootNode = $(`#${self.cfg.treeSelector}`).find('.root-row');
-          rootNode.addClass(self.cfg.nodeSelectorClass);
-          self.getNodeData(rootNode, false);
-          initialNodes = $(`#${self.cfg.treeSelector}`)
-            .find(`.${self.cfg.nodeSelectorClass}`)
-            .not(`.${self.cfg.rootNodeSelector}`)
-            .not(`.${self.cfg.hasRestrictionsClass}`)
-            .not(`.${self.cfg.noRestrictionsClass}`);
-          initialNodes.each((idx, el) => {
-            self.getNodeData(el, false);
-          });
-        }, 1000)
-      } else {
+    let initialNodes = $(`#${self.cfg.treeSelector}`).find(`.${self.cfg.nodeSelectorClass}`);
+    // all sorts of special for infinite tree
+    // is there a better way to wait for the tree to load?
+    if (this.cfg.infiniteTree) {
+      setTimeout(() => {
+        const rootNode = $(`#${self.cfg.treeSelector}`).find('.root-row');
+        rootNode.addClass(self.cfg.nodeSelectorClass);
+        self.getNodeData(rootNode, false);
+        initialNodes = $(`#${self.cfg.treeSelector}`)
+          .find(`.${self.cfg.nodeSelectorClass}`)
+          .not(`.${self.cfg.rootNodeSelector}`)
+          .not(`.${self.cfg.hasRestrictionsClass}`)
+          .not(`.${self.cfg.noRestrictionsClass}`);
         initialNodes.each((idx, el) => {
           self.getNodeData(el, false);
         });
-      }
-    });
+      }, 1000)
+    } else {
+      initialNodes.each((idx, el) => {
+        self.getNodeData(el, false);
+      });
+    }
 
     const manipTree = (mutationList, baseObserver) => {
       self.manipulateTree(mutationList);
