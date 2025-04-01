@@ -10,6 +10,9 @@ class CustomRestrictionsPui {
   }
 
   decoratePuiSearch(target, dataUri) {
+    if (!dataUri) {
+      return;
+    }
     const self = this;
     const parsedData = JSON.parse(this.searchData);
 
