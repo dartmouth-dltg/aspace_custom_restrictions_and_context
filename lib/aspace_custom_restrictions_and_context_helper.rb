@@ -112,7 +112,12 @@ class AspaceCustomRestrictionsContextHelper
     unless container_locations.nil?
       container_locations.each do |cloc|
         if cloc['status'] == 'current'
-          locations << cloc['_resolved']['title']
+          if cloc['_resolved'] && cloc['_resolved']['title']
+            locations << cloc['_resolved']['title']
+          else
+            res_cloc = JSONModel::HTTP.get_json(cloc['ref'])
+            locations << res_cloc['title'] if res_cloc && res_cloc['title']
+          end
         end
       end
     end
@@ -146,10 +151,15 @@ class AspaceCustomRestrictionsContextHelper
     if record['ancestors']
       record['ancestors'].each do |anc|
         if anc['_resolved']
-          get_ao_location(anc['_resolved'])
+          if check_for_subcontainers(anc['_resolved']['instances'])
+            return parse_containers(anc['_resolved']['instances'])
+          end
         end
       end
     end
+
+    # If we get here, we didn't find any subcontainers in the ancestors
+    nil
   end
 
   def self.get_location(record)
@@ -164,16 +174,16 @@ class AspaceCustomRestrictionsContextHelper
   def self.get_ao_location(record)
     indicator_and_location = nil
     if record['instances'].empty?
-      check_ancestor_instances(record)
+      indicator_and_location = check_ancestor_instances(record)
     else
       if check_for_subcontainers(record['instances'])
         indicator_and_location = parse_containers(record['instances'])
       else
-        check_ancestor_instances(record)
+        indicator_and_location = check_ancestor_instances(record)
       end
     end
 
-    return indicator_and_location
+    indicator_and_location
   end
 
   def self.view_content(uri)
