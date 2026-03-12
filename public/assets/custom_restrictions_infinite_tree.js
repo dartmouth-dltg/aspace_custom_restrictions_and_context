@@ -8,8 +8,9 @@ class CustomRestrictionsInfiniteTree extends CustomRestrictionsTreeBase {
     const infiniteTreeCfg = {
       infiniteTree: true,
       treeSelector: 'tree-container',
-      nodeSelectorClass: 'largetree-node',
-      decoratorNodeSelector: 'a.record-title',
+      nodeSelectorClass: 'node',
+      rootNodeSelector: 'root.node',
+      decoratorNodeSelector: 'a.node-title',
       uriSelector: 'data-uri',
     };
 

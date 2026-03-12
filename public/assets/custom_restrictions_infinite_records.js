@@ -11,7 +11,7 @@ class CustomRestrictionsInfiniteRecords extends CustomRestrictionsTreeBase {
       isInfiniteRecord: true,
       isInfiniteScroll: false,
       nodeSelectorClass: 'infinite-record-record',
-      decoratorNodeSelector: '.infinite-item h3',
+      decoratorNodeSelector: '.infinite-item .h3',
       uriSelector: 'data-uri',
     };
 

@@ -150,7 +150,7 @@ class CustomRestrictionsTreeBase {
     // is there a better way to wait for the tree to load?
     if (this.cfg.infiniteTree) {
       setTimeout(() => {
-        const rootNode = $(`#${self.cfg.treeSelector}`).find('.root-row');
+        const rootNode = $(`#${self.cfg.treeSelector}`).find(`.${self.cfg.rootNodeSelector}`);
         rootNode.addClass(self.cfg.nodeSelectorClass);
         self.getNodeData(rootNode, false);
         initialNodes = $(`#${self.cfg.treeSelector}`)
@@ -172,6 +172,7 @@ class CustomRestrictionsTreeBase {
       self.manipulateTree(mutationList);
     }
     const baseObserver = new MutationObserver(manipTree);
+    console.log(this.cfg)
     baseObserver.observe(document.getElementById(this.cfg.treeSelector), this.mutationCfg.mutationConfig);
   }
 }
