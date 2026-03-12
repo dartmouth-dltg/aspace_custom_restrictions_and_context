@@ -3,6 +3,7 @@ class CustomRestrictionsTree {
   constructor(repoId) {
     this.repoId = repoId;
     this.treeSelector = 'tree-container';
+    this.infiniteTreeSelector = 'infinite-tree-container';
     this.nodeSelector = 'a.record-title';
     this.mutationConfig = {
       attributes: false,
@@ -16,11 +17,16 @@ class CustomRestrictionsTree {
   }
 
   decorateTreeObject(data, el) {
-    if (Object.keys(data).length > 0) {
-      $(el).addClass('custom-restriction-tree-node').prepend(this.puiTreeWarning(data));
-    }
-    else {
-      $(el).addClass('no-custom-restriction-tree-node');
+    if (
+      !$(el).hasClass('no-custom-restriction-tree-node') &&
+      !$(el).hasClass('custom-restriction-tree-node')
+    ) {
+      if (Object.keys(data).length > 0) {
+        $(el).addClass('custom-restriction-tree-node').prepend(this.puiTreeWarning(data));
+      }
+      else {
+        $(el).addClass('no-custom-restriction-tree-node');
+      }
     }
   }
 
@@ -42,33 +48,42 @@ class CustomRestrictionsTree {
       console.log('Error fetching tree object json');
     });
   }
-  
-  manipulateTree(mutationList) {
+
+  prepareNodes(nodes) {
     const self = this;
+    nodes.each((index, nodeEl) => {
+      const node = $(nodeEl);
+    if (
+      !node.hasClass('no-custom-restriction-tree-node') &&
+      !node.hasClass('custom-restriction-tree-node')
+    ) {
+      const href = node.attr('href');
+      const uriParts = href.split("::").slice(-1).join('');
+      const idAndType = uriParts.split("_");
+      const id = idAndType.slice(-1).join('');
+      const type = `${idAndType.slice(0, -1).join('_')}s`;
+
+      self.fetchTreeObjectJson(id, type, node);
+    }
+  });
+}
+  
+  observeTree(mutationList) {
+    const self = this;
+
     mutationList.forEach((el) => {
       if (el.type !== 'childList') {
         return;
       }
+
       if (el.addedNodes && el.addedNodes.length > 0) {
         $(el.addedNodes).each((idx, el) => {
 
-          const node = $(el).find(self.nodeSelector);
-          if (node.length < 1) {
+          const nodes = $(el).find(self.nodeSelector);
+          if (nodes.length < 1) {
             return;
           }
-
-          if (
-            !node.hasClass('no-custom-restriction-tree-node') &&
-            !node.hasClass('custom-restriction-tree-node')
-          ) {
-            const href = node.attr('href');
-            const uriParts = href.split("::").slice(-1).join('');
-            const idAndType = uriParts.split("_");
-            const id = idAndType.slice(-1).join('');
-            const type = `${idAndType.slice(0, -1).join('_')}s`;
-
-            self.fetchTreeObjectJson(id, type, node);
-          }
+          self.prepareNodes(nodes)
         });
       }
     });
@@ -77,9 +92,16 @@ class CustomRestrictionsTree {
   initialize() {
     const self = this;
     const manipTree = (mutationList, observer) => {
-      self.manipulateTree(mutationList);
+      self.observeTree(mutationList);
     }
+    const stdTree = document.getElementById(this.treeSelector);
+    const infiniteTree = document.getElementById(this.infiniteTreeSelector);
+
     const observer = new MutationObserver(manipTree);
-    observer.observe(document.getElementById(this.treeSelector), this.mutationConfig);
+    if (stdTree !== null) {
+      observer.observe(document.getElementById(this.treeSelector), this.mutationConfig);
+    } else if (infiniteTree !== null) {
+      observer.observe(document.getElementById(this.infiniteTreeSelector), this.mutationConfig);
+    }
   }
 }

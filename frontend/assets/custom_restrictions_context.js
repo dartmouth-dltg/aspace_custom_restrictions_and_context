@@ -11,6 +11,8 @@ class CustomRestrictionsAndContext {
     this.repo_id = repo_id;
     this.displayContext = displayContext;
     this.objectTypes = ['accessions', 'archival_objects', 'digital_objects', 'digital_object_components', 'resources'];
+    this.displayContextSelector = 'custom-restrictions-display-context';
+    this.miniTreeDataSelector = 'custom-restrictions-view-data';
   }
 
   restrictionTypeSnippet(restrictionType) {
@@ -38,7 +40,7 @@ class CustomRestrictionsAndContext {
     $(this.objectTitleSelector).append($(this.restrictionsId));
   }
 
-  addMiniTree(data) {
+  addMiniTree(data, displayContext = this.displayContext) {
     const hasContext = $(data).find('#mini-tree-context').length > 0;
     const hasLocation = $(data).find('.mini-tree-location').length > 0
     if (hasContext === false) {
@@ -49,13 +51,14 @@ class CustomRestrictionsAndContext {
     }
     if (hasLocation === false && hasContext == false) {
       $(this.miniTreeLoaderSelector).remove();
+    } else {
+      if (displayContext) {
+        this.displayMiniTreeToggle();
+        $(this.miniTreeLoaderSelector).attr('aria-expanded', 'true');
+      }
     }
     $(this.basicInformation).before(data);
     this.moveRestrictionsLabel();
-
-    if (this.displayContext) {
-      $(this.miniTreeLoaderSelector).attr('aria-expanded', 'true');
-    }
   }
 
   removeMiniTreeToggle() {
@@ -82,15 +85,20 @@ class CustomRestrictionsAndContext {
   displayMiniTreeToggle() {
     const self = this;
 
-    if (this.displayContext) {
-      const miniTreeLoader = AS.renderTemplate("template_custom_restrictions_context_and_location");
-      $(this.objectTitleSelector).after(miniTreeLoader);
+    const miniTreeLoader = AS.renderTemplate("template_custom_restrictions_context_and_location");
+    $(this.objectTitleSelector).after(miniTreeLoader);
 
-      $('body').on('click', this.miniTreeLoaderSelector, (evt) => {
-        evt.preventDefault();
-        self.toggleMiniTree();
-      })
-    }
+    $(this.miniTreeLoaderSelector).on('click', (evt) => {
+      evt.preventDefault();
+      self.toggleMiniTree();
+    })
+  }
+
+  initializeMiniTree() {
+    const displayContext = $(`#${this.displayContextSelector}`).data('value');
+    const miniTreeData = $(`#${this.miniTreeDataSelector}`).html();
+    
+    this.addMiniTree(miniTreeData, displayContext);
   }
 
   displaySearchEnhancements(id, target) {

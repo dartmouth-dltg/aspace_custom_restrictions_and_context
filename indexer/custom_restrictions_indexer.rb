@@ -14,6 +14,7 @@ class IndexerCommon
   add_indexer_initialize_hook do |indexer|
     indexer.add_document_prepare_hook {|doc, record|
       doc['custom_restrictions_u_sbool'] = nil
+      record_data = record['record']
       case doc['primary_type']
       when 'accession'
         location = AspaceCustomRestrictionsContextHelper.get_location(record_data)
