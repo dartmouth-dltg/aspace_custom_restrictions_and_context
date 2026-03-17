@@ -1,7 +1,7 @@
 class CustomRestrictionsTree extends CustomRestrictionsTreeBase {
 
-  constructor(repoUri, tree) {
-    super(repoUri, tree);
+  constructor(repoUri, appVersion = 4.1) {
+    super(repoUri, appVersion);
   }
 
   fullConfig() {

@@ -1,16 +1,25 @@
 class CustomRestrictionsInfiniteTree extends CustomRestrictionsTreeBase {
 
-  constructor(repoUri, tree) {
-    super(repoUri, tree);
+  constructor(repoUri, appVersion = 4.1) {
+    super(repoUri, appVersion);
   }
 
   fullConfig() {
+    console.log(this.appVersion)
+    let rootNodeSelector = '.root-row';
+    let decoratorSelector = 'a.record-title';
+    let nodeSelectorClass = 'largetree-node';
+    if (this.appVersion >= 4.2) {
+      rootNodeSelector = 'root.node';
+      decoratorSelector = 'a.node-title';
+      nodeSelectorClass = 'node';
+    }
     const infiniteTreeCfg = {
       infiniteTree: true,
       treeSelector: 'tree-container',
       nodeSelectorClass: 'node',
-      rootNodeSelector: 'root.node',
-      decoratorNodeSelector: 'a.node-title',
+      rootNodeSelector: rootNodeSelector,
+      decoratorNodeSelector: decoratorSelector,
       uriSelector: 'data-uri',
     };
 

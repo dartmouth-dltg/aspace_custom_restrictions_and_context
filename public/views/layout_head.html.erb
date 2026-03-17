@@ -60,25 +60,25 @@
           <% unless @result.repository_information.nil? %>
             if (typeof tree !== 'undefined' && typeof LargeTree !== 'undefined') {
               if (tree instanceof LargeTree) {
-                const customTree = new CustomRestrictionsTree(`<%= raw @result.repository_information.dig('top','uri') %>`, tree);
+                const customTree = new CustomRestrictionsTree(`<%= raw @result.repository_information.dig('top','uri') %>`, `<%= AppConfig[:custom_restrict_app_version]%>`);
                 customTree.initialize();
               }
             }
             if (typeof scroll !== 'undefined' && typeof InfiniteScroll !== 'undefined') {
               if (scroll instanceof InfiniteScroll) {
-                const customInfiniteRecords = new CustomRestrictionsInfiniteScroll(`<%= raw @result.repository_information.dig('top','uri') %>`);
+                const customInfiniteRecords = new CustomRestrictionsInfiniteScroll(`<%= raw @result.repository_information.dig('top','uri') %>`, `<%= AppConfig[:custom_restrict_app_version]%>`);
                 customInfiniteRecords.initialize();
               }
             }
             if (typeof infiniteTree !== 'undefined' && typeof InfiniteTree !== 'undefined') {
               if (infiniteTree instanceof InfiniteTree) {
-                const customInfiniteTree = new CustomRestrictionsInfiniteTree(`<%= raw @result.repository_information.dig('top','uri') %>`);
+                const customInfiniteTree = new CustomRestrictionsInfiniteTree(`<%= raw @result.repository_information.dig('top','uri') %>`, `<%= AppConfig[:custom_restrict_app_version]%>`);
                 customInfiniteTree.initialize();
               }
             }
             if (typeof infiniteRecords !== 'undefined' && typeof InfiniteRecords !== 'undefined') {
               if (infiniteRecords instanceof InfiniteRecords) {
-                const customInfiniteRecords = new CustomRestrictionsInfiniteRecords(`<%= raw @result.repository_information.dig('top','uri') %>`);
+                const customInfiniteRecords = new CustomRestrictionsInfiniteRecords(`<%= raw @result.repository_information.dig('top','uri') %>`, `<%= AppConfig[:custom_restrict_app_version]%>`);
                 customInfiniteRecords.initialize();
               }
             }

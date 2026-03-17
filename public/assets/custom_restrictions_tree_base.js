@@ -1,7 +1,8 @@
 class CustomRestrictionsTreeBase {
 
-  constructor(repoUri, tree) {
+  constructor(repoUri, appVersion) {
     this.repoUri = repoUri;
+    this.appVersion = appVersion;
     this.cfg = this.fullConfig();
     this.mutationCfg = this.mutationConfig();
   }

@@ -25,4 +25,7 @@ Rails.application.config.after_initialize do
   
   AppConfig[:aspace_custom_restrictions_pui_assets_filename] = CssJsCompile.reaggregate_files(css_files, js_files, plugin_directory)
 
+  as_version_file = File.read(File.join(ASUtils.find_base_directory, 'ARCHIVESSPACE_VERSION'))
+  AppConfig[:custom_restrict_app_version] = as_version_file.gsub('v','').split('-')[0].to_f
+
 end

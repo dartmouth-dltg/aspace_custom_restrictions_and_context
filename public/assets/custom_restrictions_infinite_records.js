@@ -1,17 +1,23 @@
 class CustomRestrictionsInfiniteRecords extends CustomRestrictionsTreeBase {
 
-  constructor(repoUri, tree) {
-    super(repoUri, tree);
+  constructor(repoUri, appVersion = 4.1) {
+    super(repoUri, appVersion);
   }
 
   fullConfig() {
+    let decoratorNodeSelector = '.infinite-item h3';
+    console.log(this.appVersion)
+    if (this.appVersion >= 4.2) {
+      decoratorNodeSelector = '.infinite-item .h3';
+    }
+    console.log(decoratorNodeSelector)
     const infiniteRecordCfg = {
       treeSelector: 'infinite-records-container',
       infiniteTree: true,
       isInfiniteRecord: true,
       isInfiniteScroll: false,
       nodeSelectorClass: 'infinite-record-record',
-      decoratorNodeSelector: '.infinite-item .h3',
+      decoratorNodeSelector: decoratorNodeSelector,
       uriSelector: 'data-uri',
     };
 
