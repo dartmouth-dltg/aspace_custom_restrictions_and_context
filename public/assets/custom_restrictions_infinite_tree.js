@@ -1,15 +1,15 @@
 class CustomRestrictionsInfiniteTree extends CustomRestrictionsTreeBase {
 
-  constructor(repoUri, appVersion = 4.1) {
+  constructor(repoUri, appVersion = 4.0) {
     super(repoUri, appVersion);
   }
 
   fullConfig() {
     console.log(this.appVersion)
-    let rootNodeSelector = '.root-row';
+    let rootNodeSelector = 'root-row';
     let decoratorSelector = 'a.record-title';
     let nodeSelectorClass = 'largetree-node';
-    if (this.appVersion >= 4.2) {
+    if (this.appVersion >= 4.1) {
       rootNodeSelector = 'root.node';
       decoratorSelector = 'a.node-title';
       nodeSelectorClass = 'node';

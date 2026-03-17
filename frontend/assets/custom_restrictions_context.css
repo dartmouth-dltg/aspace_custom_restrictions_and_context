@@ -1,3 +1,6 @@
+:root {
+  --cc-mid-grey: #ccc;
+}
 /* override core */
 .record-pane .h2,
 .record-pane h2 {
@@ -13,46 +16,46 @@
   align-items: center;
   white-space: wrap;
   text-align: left;
-}
-#custom-restriction::before {
-  margin-right: 4px;
-  content: "\e002";
-  vertical-align: text-bottom;
-  font-family: "Material Symbols Outlined";
-  font-variation-settings: "FILL" 1;
+  &::before {
+    margin-right: 4px;
+    content: "\e002";
+    vertical-align: text-bottom;
+    font-family: "Material Symbols Outlined";
+    font-variation-settings: "FILL" 1;
+  }
 }
 #custom-restriction-mini-tree-loader {
   margin-left: 0;
   border: none;
-}
-#custom-restriction-mini-tree-loader[aria-expanded="true"] {
-  border-radius: 4px 4px 0 0;
-}
-#custom-restriction-mini-tree-loader::after {
-  content: "\e5cf";
-  vertical-align: text-bottom;
-  font-family: "Material Symbols Outlined";
-  font-variation-settings: "FILL" 1;
-}
-#custom-restriction-mini-tree-loader[aria-expanded="true"]::after {
-  content: "\e5ce";
+  &::after {
+    content: "\e5cf";
+    vertical-align: text-bottom;
+    font-family: "Material Symbols Outlined";
+    font-variation-settings: "FILL" 1;
+  }
+  &[aria-expanded="true"] {
+    border-radius: 4px 4px 0 0;
+    &::after {
+      content: "\e5ce";
+    }
+  }
 }
 #custom-restrictions-mini-tree {
   margin-bottom: 1rem;
   padding: 1rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--cc-mid-grey);
   border-radius: 0 4px 4px 4px;
 }
 span[class*="mini-tree-level-"] {
   display: block;
-}
-span[class*="mini-tree-level-"]::before {
-  padding-bottom: 2px;
-  content: "\e5da";
-  vertical-align: middle;
-  font-size: 1.35rem;
-  font-family: "Material Symbols Outlined";
-  font-variation-settings: "FILL" 1;
+ &::before {
+    padding-bottom: 2px;
+    content: "\e5da";
+    vertical-align: middle;
+    font-size: 1.35rem;
+    font-family: "Material Symbols Outlined";
+    font-variation-settings: "FILL" 1;
+  }
 }
 span.mini-tree-level-0::before {
   content: "\e8de";
@@ -78,12 +81,12 @@ span.mini-tree-level-0::before {
 #mini-tree-locations-and-indicators {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #ccc;
-}
-#mini-tree-locations-and-indicators.no-context-tree {
-  margin-top: 0;
-  padding-top: 0;
-  border: none;
+  border-top: 1px solid var(--cc-mid-grey);
+  &.no-context-tree {
+    margin-top: 0;
+    padding-top: 0;
+    border: none;
+  }
 }
 .mini-tree-location {
   display: grid;
@@ -91,39 +94,44 @@ span.mini-tree-level-0::before {
   gap: 1rem;
   margin-bottom: 0.5rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #ccc;
-}
-.mini-tree-location:last-of-type {
-  margin-bottom: 0;
-  padding-bottom: 0;
-  border: none;
-}
-.mini-tree-location::before {
-  content: "\e0c8";
-  font-family: "Material Symbols Outlined";
-  font-variation-settings: "FILL" 1;
-  font-size: 2rem;
-  color: #666;
+  border-bottom: 1px solid var(--cc-mid-grey);
+  > div {
+    align-self: center;
+  }
+  &:last-of-type {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border: none;
+  }
+  &::before {
+    content: "\e0c8";
+    font-family: "Material Symbols Outlined";
+    font-variation-settings: "FILL" 1;
+    font-size: 2rem;
+    color: #666;
+  }
 }
 
 /* Search */
 
 /* don't display the context */
-#tabledSearchResults #mini-tree-context {
-  display: none;
-}
+#tabledSearchResults {
+  #mini-tree-context {
+    display: none;
+  }
 
-#tabledSearchResults #mini-tree-locations-and-indicators {
-  margin-top: 0;
-  padding: 4px;
-  border: none;
-}
+  #mini-tree-locations-and-indicators {
+    margin-top: 0;
+    padding: 4px;
+    border: none;
+  }
 
-#tabledSearchResults #custom-restrictions-mini-tree {
-  margin-top: 1rem;
-  padding: 0;
-  border: none;
-  font-size: 1.4rem;
+  #custom-restrictions-mini-tree {
+    margin-top: 1rem;
+    padding: 0;
+    border: none;
+    font-size: 1.4rem;
+  }
 }
 
 /* Trees */
@@ -135,6 +143,7 @@ span.mini-tree-level-0::before {
   font-variation-settings: "FILL" 1;
 }
 
+.visually-hidden,
 .custom-restrictions-visually-hidden {
   position: absolute !important;
   width: 1px !important;
