@@ -6,7 +6,6 @@ class CustomRestrictionsController < ApplicationController
 
   def mini_tree
     id = params[:id]
-    repo_id = params[:repo_id]
     record_type = params[:type]
     restrictions_only = params[:restrictions_only] ? true : false
     allowed_types = [
@@ -19,7 +18,8 @@ class CustomRestrictionsController < ApplicationController
 
     return unless allowed_types.include?(record_type)
 
-    uri = "/repositories/#{session[:repo_id]}/#{record_type}/#{id}"
+    repo_id = session[:repo_id]
+    uri = "/repositories/#{repo_id}/#{record_type}/#{id}"
 
     @tree = []
     @location = []
@@ -31,11 +31,8 @@ class CustomRestrictionsController < ApplicationController
       end
     else
 
-      params = {"filter_term[]" => [{"uri" => uri}.to_json], "q" => "*", "resolve[]" => ["ancestors:id@custom_restrictions_compact_resource"]}
-      repo = JSONModel.parse_reference(uri)[:repository]
-      repo_id = JSONModel.parse_reference(repo)[:id]
-
-      results = Search.all(repo_id, params)["results"]
+      search_params = {"filter_term[]" => [{"uri" => uri}.to_json], "q" => "*", "resolve[]" => ["ancestors:id@custom_restrictions_compact_resource"]}
+      results = Search.all(repo_id, search_params)["results"]
 
       unless results.empty?
         record = results.first

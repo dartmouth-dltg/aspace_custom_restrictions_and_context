@@ -23,8 +23,7 @@ class CustomRestrictionsTreeBase {
   }
 
   fullConfig() {
-    // must implement in child class
-    console.log('Implement fullConfig() method in child class');
+    throw new Error('fullConfig() must be implemented in subclass');
   }
 
   mutationConfig() {
@@ -95,7 +94,7 @@ class CustomRestrictionsTreeBase {
     return type;
   }
 
-  checkUri(dataUri) {
+  checkUri(dataUri, type) {
     if (dataUri.includes('::')) {
       const objectId = `${dataUri.split('::')[1].split('_').slice(-1)}`;
       dataUri = `${this.repoUri}/${type}/${objectId}`;
@@ -123,8 +122,8 @@ class CustomRestrictionsTreeBase {
       !node.find(`a.${this.cfg.noRestrictionsClass}`).length > 0
     ) {
       const initialDataUri = node.attr(this.cfg.uriSelector);
-      const dataUri = this.checkUri(initialDataUri);
       const type = this.calcType(initialDataUri);
+      const dataUri = this.checkUri(initialDataUri, type);
       this.fetchTreeObjectJson(dataUri, type, node);
     }
   }
@@ -173,7 +172,11 @@ class CustomRestrictionsTreeBase {
       self.manipulateTree(mutationList);
     }
     const baseObserver = new MutationObserver(manipTree);
-    console.log(this.cfg)
     baseObserver.observe(document.getElementById(this.cfg.treeSelector), this.mutationCfg.mutationConfig);
+  
+    // Disconnect when Turbolinks unloads the page
+    $(document).one('turbolinks:before-cache', () => {
+      baseObserver.disconnect();
+    });
   }
 }

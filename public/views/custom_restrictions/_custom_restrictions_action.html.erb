@@ -10,7 +10,7 @@
   end
 %>
 <script>
-  $().ready(() => {
+  onPageLoad(() => {
     const customObjectRestriction = new CustomRestrictionsPui();
     customObjectRestriction.objectRestrictionDisplay(`<%= restrictions %>`);
   });

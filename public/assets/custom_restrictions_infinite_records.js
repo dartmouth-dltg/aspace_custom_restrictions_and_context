@@ -6,11 +6,11 @@ class CustomRestrictionsInfiniteRecords extends CustomRestrictionsTreeBase {
 
   fullConfig() {
     let decoratorNodeSelector = '.infinite-item h3';
-    console.log(this.appVersion)
+    
     if (this.appVersion >= 4.2) {
       decoratorNodeSelector = '.infinite-item .h3';
     }
-    console.log(decoratorNodeSelector)
+
     const infiniteRecordCfg = {
       treeSelector: 'infinite-records-container',
       infiniteTree: true,

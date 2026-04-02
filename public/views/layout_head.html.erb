@@ -10,22 +10,9 @@
   <%= javascript_include_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_infinite_records.js" %>
   <%= javascript_include_tag "#{AppConfig[:public_proxy_prefix]}assets/custom_restrictions_infinite_scroll.js" %>
   <% 
-
-    def is_search? 
-      controller.controller_name == "search"
-    end
-    def is_resource_idx? 
-      controller.controller_name == "resources"
-    end
-    def is_accession_idx? 
-      controller.controller_name == "accessions"
-    end
-    def is_digital_object_idx? 
-      controller.controller_name == "objects"
-    end
-
     custom_restrictions_object_data = {}
-    if is_search? || is_accession_idx? || is_resource_idx? || is_digital_object_idx?
+    add_restrictions = should_add_custom_restrictions?(controller)
+    if add_restrictions
       unless @results.nil?
         @results.records.each do |full_result|
           result = full_result.raw
@@ -50,42 +37,27 @@
     end
   %>
 
-  <% if is_search? || is_accession_idx? || is_digital_object_idx? || is_resource_idx? %>
-  <script>
-    $().ready(() => {
-      const puiSearchRestrictions = new CustomRestrictionsPui(`<%= raw ASUtils.to_json(custom_restrictions_object_data) %>`);
-      puiSearchRestrictions.setupDecoratePuiSearch();
-      <% unless AppConfig.has_key?(:aspace_custom_restrictions_pui_tree) && AppConfig[:aspace_custom_restrictions_pui_tree] == false %>
-        <% unless @result.nil? %>
-          <% unless @result.repository_information.nil? %>
-            if (typeof tree !== 'undefined' && typeof LargeTree !== 'undefined') {
-              if (tree instanceof LargeTree) {
-                const customTree = new CustomRestrictionsTree(`<%= raw @result.repository_information.dig('top','uri') %>`, `<%= AppConfig[:custom_restrict_app_version]%>`);
-                customTree.initialize();
-              }
-            }
-            if (typeof scroll !== 'undefined' && typeof InfiniteScroll !== 'undefined') {
-              if (scroll instanceof InfiniteScroll) {
-                const customInfiniteRecords = new CustomRestrictionsInfiniteScroll(`<%= raw @result.repository_information.dig('top','uri') %>`, `<%= AppConfig[:custom_restrict_app_version]%>`);
-                customInfiniteRecords.initialize();
-              }
-            }
-            if (typeof infiniteTree !== 'undefined' && typeof InfiniteTree !== 'undefined') {
-              if (infiniteTree instanceof InfiniteTree) {
-                const customInfiniteTree = new CustomRestrictionsInfiniteTree(`<%= raw @result.repository_information.dig('top','uri') %>`, `<%= AppConfig[:custom_restrict_app_version]%>`);
-                customInfiniteTree.initialize();
-              }
-            }
-            if (typeof infiniteRecords !== 'undefined' && typeof InfiniteRecords !== 'undefined') {
-              if (infiniteRecords instanceof InfiniteRecords) {
-                const customInfiniteRecords = new CustomRestrictionsInfiniteRecords(`<%= raw @result.repository_information.dig('top','uri') %>`, `<%= AppConfig[:custom_restrict_app_version]%>`);
-                customInfiniteRecords.initialize();
-              }
-            }
-          <% end %>
-        <% end %>
-      <% end %>
-    });
-  </script>
+  <% if add_restrictions %>
+
+    <script id="custom-restrictions-data" type="application/json">
+      <%= raw safe_json_script(custom_restrictions_object_data) %>
+    </script>
+    <% tree_enabled = !(AppConfig.has_key?(:aspace_custom_restrictions_pui_tree) && AppConfig[:aspace_custom_restrictions_pui_tree] == false) %>
+    <% if tree_enabled && !is_search?(controller) && @result&.repository_information %>
+      <script id="custom-restrictions-repo-data" type="application/json">
+        <%= raw safe_json_script({
+          repo_uri: @result.repository_information.dig('top', 'uri'),
+          app_version: AppConfig[:custom_restrict_app_version]
+        }) %>
+      </script>
+    <% end %>
+    <script>
+      onPageLoad(() => {
+        const data = JSON.parse(document.getElementById('custom-restrictions-data').textContent);
+        const puiSearchRestrictions = new CustomRestrictionsPui(data);
+        puiSearchRestrictions.setupDecoratePuiSearch();
+        initializeTree();
+      });
+    </script>
   <% end %>
 <% end %>
