@@ -1,7 +1,8 @@
 class AspaceCustomRestrictionsContextHelper
 
   def self.use_accessrestrict?
-   AppConfig.has_key?(:aspace_custom_restrictions_use_accessrestrict) && AppConfig[:aspace_custom_restrictions_use_accessrestrict] == false ? false : true
+    return false if !AppConfig.has_key?(:aspace_custom_restrictions_use_accessrestrict) 
+    AppConfig[:aspace_custom_restrictions_use_accessrestrict] == true ? true : false
   end
 
   def self.record_level(record)
