@@ -74,10 +74,10 @@ AppConfig[:aspace_custom_restrictions_access_note_skip_phrases] = [
 ```
 You can have multiple skip phrases in the configuration option.
 
-You can also completely turn off the use of Conditions Governing Access notes in the restriction
-calculation.
+Conditions Governing Access notes are not used in the restriction calculation unless you
+turn them on.
 ```
-AppConfig[:aspace_custom_restrictions_use_accessrestrict] = false
+AppConfig[:aspace_custom_restrictions_use_accessrestrict] = true
 ```
 
 Tree decoration is also optional. You can choose to turn these off to conserve server resources.
@@ -109,8 +109,8 @@ which allows an editor to tag an object with more nuance than just the stock
 `Restrictions Apply?` checkbox. However, if that checkbox had been ticked, the plugin
 will also use that data.
 
-The plugin parses the custom restriction data, any Conditions Governing Access notes,
-and the `Restrictions Apply?` data and displays a warning on the object that the restriction
+The plugin parses the custom restriction data, any Conditions Governing Access notes
+(if enabled), and the `Restrictions Apply?` data and displays a warning on the object that the restriction
 has been applied. It also displays the restriction text on all of its descendants. The
 language displayed depends on the custom restriction selected or 
 provides a default. See `frontend/locales/enums` for values supplied by the plugin. This is
