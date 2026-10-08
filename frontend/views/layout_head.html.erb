@@ -12,21 +12,9 @@
       display_context = false
     end
 
-    def search_page?
-      controller.controller_name == "search"
-    end
-
-    def is_resource_idx? 
-      controller.controller_name == "resources" && controller.action_name == "index"
-    end
-
-    def is_accession_idx? 
-      controller.controller_name == "accessions" && controller.action_name == "index"
-    end
-
-    def is_digital_object_idx? 
-      controller.controller_name == "digital_objects" && controller.action_name == "index"
-    end
+    ctrl = controller.controller_name
+    decorate_search = ctrl == 'search' ||
+      (%w[resources accessions digital_objects].include?(ctrl) && controller.action_name == 'index')
 
     custom_restrictions_object_data = {}
 
@@ -70,7 +58,7 @@
   <script>
     $().ready(() => {
       <% unless AppConfig.has_key?(:aspace_custom_restrictions_sui_search_enhance) && AppConfig[:aspace_custom_restrictions_sui_search_enhance] == false %>
-        <% if search_page? || is_accession_idx? || is_digital_object_idx? || is_resource_idx? %>
+        <% if decorate_search %>
           const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>, `<%= raw j(ASUtils.to_json(custom_restrictions_object_data)) %>`);
           objectDecorator.decorateSearchTypes();
         <% else %>
