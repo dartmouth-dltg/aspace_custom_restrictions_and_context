@@ -1,9 +1,58 @@
+// Collects restriction lookups made in quick succession (e.g. a tree expanding) into
+// a single GET request instead of one request per node.
+class CustomRestrictionsBatcher {
+
+  constructor(url, delay = 50, maxBatch = 50) {
+    this.url = url;
+    this.delay = delay;
+    this.maxBatch = maxBatch;
+    this.pending = new Map();
+    this.timer = null;
+  }
+
+  request(uri, callback) {
+    if (!this.pending.has(uri)) {
+      this.pending.set(uri, []);
+    }
+    this.pending.get(uri).push(callback);
+
+    if (this.timer === null) {
+      this.timer = setTimeout(() => this.flush(), this.delay);
+    }
+  }
+
+  flush() {
+    this.timer = null;
+    const uris = Array.from(this.pending.keys()).slice(0, this.maxBatch);
+    if (uris.length === 0) {
+      return;
+    }
+
+    const callbacks = uris.map((uri) => this.pending.get(uri));
+    uris.forEach((uri) => this.pending.delete(uri));
+    if (this.pending.size > 0) {
+      this.timer = setTimeout(() => this.flush(), this.delay);
+    }
+
+    $.ajax({
+      url: this.url,
+      data: { uris: uris },
+      method: 'get',
+    }).done((data) => {
+      uris.forEach((uri, idx) => callbacks[idx].forEach((cb) => cb((data || {})[uri])));
+    }).fail(() => {
+      console.log('Error fetching custom restrictions');
+    });
+  }
+}
+
 class CustomRestrictionsTreeBase {
 
   constructor(repoUri, tree) {
     this.repoUri = repoUri;
     this.cfg = this.fullConfig();
     this.mutationCfg = this.mutationConfig();
+    this.batcher = new CustomRestrictionsBatcher(`${APP_PATH.replace(/\/$/, '')}/aspace_custom_restrictions_and_context/pui_restrictions`);
   }
 
   baseConfig() {
@@ -62,24 +111,14 @@ class CustomRestrictionsTreeBase {
     }
   }
 
-  fetchTreeObjectJson(dataUri, recordType = 'archival_objects', el) {
+  fetchTreeObjectJson(dataUri, el) {
     const self = this;
 
-    $.ajax({
-      url: `${APP_PATH.replace(/\/$/, '')}/aspace_custom_restrictions_and_context/pui_restrictions`,
-      data: {
-        uri: dataUri,
-        type: recordType,
-      },
-      method: 'post',
-    }).done((data) => {
-
+    self.batcher.request(dataUri, (data) => {
       if (self.cfg.infiniteTree || self.cfg.isInfiniteRecord) {
         el = el.find(self.cfg.decoratorNodeSelector);
       }
-      self.decorateTreeObject(data, el);
-    }).fail(() => {
-      console.log('Error fetching object json');
+      self.decorateTreeObject(data || '', el);
     });
   }
 
@@ -124,8 +163,7 @@ class CustomRestrictionsTreeBase {
     ) {
       const initialDataUri = node.attr(this.cfg.uriSelector);
       const dataUri = this.checkUri(initialDataUri);
-      const type = this.calcType(initialDataUri);
-      this.fetchTreeObjectJson(dataUri, type, node);
+      this.fetchTreeObjectJson(dataUri, node);
     }
   }
   

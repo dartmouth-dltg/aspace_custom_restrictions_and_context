@@ -71,7 +71,7 @@ class CustomRestrictionsAndContext {
         repo_id: self.repo_id,
         type: recordType,
       },
-      method: 'post',
+      method: 'get',
     }).done((data) => {
       self.addMiniTree(data);
     }).fail(() => {
