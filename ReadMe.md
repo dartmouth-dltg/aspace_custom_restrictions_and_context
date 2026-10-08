@@ -146,9 +146,10 @@ list, make sure that you also add translations in `frontend/locales/enums`.
 ### Performance
 
 In order to make this plugin useful for multiple versions of ArchivesSpace and to limit maintenance of
-multiple versions, the plugin uses javascript to enhance the tree layouts and makes one additional request 
-per tree object. Depending on the resources available to your ArchivesSpace instance, you may notice some
-performance impacts.
+multiple versions, the plugin uses javascript to enhance the tree layouts. Tree node lookups are batched into a
+single GET request per burst of nodes (up to 50 records per request), so you should see few
+additional requests, but may still notice some performance impact depending on the resources
+available to your ArchivesSpace instance.
 
 ### Asset Aggregation
 
