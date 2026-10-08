@@ -13,42 +13,34 @@ class CustomRestrictionsPuiController < ApplicationController
       'digital_object_components',
       'resources'
     ]
-    resolve = ['ancestors:id']
 
-    if allowed_types.include?(record_type)
-
-      begin
-        results = ArchivesSpaceClient.instance.search_records([uri])
-      rescue
-        record = false
-      end
-
-      unless results.raw.fetch('results', []).empty?
-        record = results.raw.fetch('results').fetch(0)
-      end
-
-      if record
-        restrictions = record['custom_restrictions_u_sstr'].nil? ? {} : ASUtils.json_parse(record['custom_restrictions_u_sstr'].fetch(0))
-        restrictions = AspaceCustomRestrictionsContextHelper.restriction_applies_to_object?(record, restrictions)
-
-        # restrictions is in form {level => restriction_type}
-        if restrictions.empty?
-          render :json => {}
-        else
-          restriction_type = I18n.t('enumerations.custom_restriction_type.' + restrictions.values.first, default: I18n.t('enumerations.custom_restriction_type.default'))
-          restriction_message = I18n.t('custom_restrictions_and_context.restriction_label', 
-                              level: restrictions.keys.first.titleize,
-                              restriction: restriction_type
-                          )
-          render :json => ASUtils.to_json(restriction_message)
-        end
-
-      else
-        render :json => {}
-      end
-
-    else
+    unless allowed_types.include?(record_type)
       render :json => {}
+      return
+    end
+
+    record = begin
+      ArchivesSpaceClient.instance.search_records([uri]).raw.fetch('results', []).first
+    rescue StandardError => e
+      Rails.logger.error("custom restrictions: search failed for #{uri}: #{e.message}")
+      nil
+    end
+
+    restrictions = {}
+    if record
+      restrictions = record['custom_restrictions_u_sstr'].nil? ? {} : ASUtils.json_parse(record['custom_restrictions_u_sstr'].fetch(0))
+      restrictions = AspaceCustomRestrictionsContextHelper.restriction_applies_to_object?(record, restrictions)
+    end
+
+    # restrictions is in form {level => restriction_type}
+    if restrictions.empty?
+      render :json => {}
+    else
+      restriction_type = I18n.t('enumerations.custom_restriction_type.' + restrictions.values.first, default: I18n.t('enumerations.custom_restriction_type.default'))
+      restriction_message = I18n.t('custom_restrictions_and_context.restriction_label',
+                                   level: restrictions.keys.first.titleize,
+                                   restriction: restriction_type)
+      render :json => ASUtils.to_json(restriction_message)
     end
   end
 

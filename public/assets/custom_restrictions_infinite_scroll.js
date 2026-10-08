@@ -24,6 +24,9 @@ class CustomRestrictionsInfiniteScroll extends CustomRestrictionsTreeBase {
       self.manipulateTree(mutationList);
     }
     const infiniteScrollObserver = new MutationObserver(manipTree);
-    infiniteScrollObserver.observe(document.getElementsByClassName(this.cfg.treeSelector)[0], this.mutationCfg.mutationConfig);
+    const container = document.getElementsByClassName(this.cfg.treeSelector)[0];
+    if (container) {
+      infiniteScrollObserver.observe(container, this.mutationCfg.mutationConfig);
+    }
   }
 }

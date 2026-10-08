@@ -66,7 +66,7 @@ class CustomRestrictionsTreeBase {
     const self = this;
 
     $.ajax({
-      url: '/aspace_custom_restrictions_and_context/pui_restrictions',
+      url: `${APP_PATH.replace(/\/$/, '')}/aspace_custom_restrictions_and_context/pui_restrictions`,
       data: {
         uri: dataUri,
         type: recordType,

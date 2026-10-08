@@ -8,8 +8,8 @@ class IndexerCommon
     'top_container',
     'top_container::container_locations'
   ]
-  @@resolved_attributes += @custom_restriction_resolves
-  AppConfig[:record_inheritance_resolves] += @custom_restriction_resolves
+  @custom_restriction_resolves.each {|attr| add_attribute_to_resolve(attr)}
+  AppConfig[:record_inheritance_resolves] |= @custom_restriction_resolves
 
   add_indexer_initialize_hook do |indexer|
     indexer.add_document_prepare_hook {|doc, record|
@@ -77,7 +77,8 @@ class IndexerCommon
     if restrictions.empty?
       if record['ancestors'] && record['ancestors'].length > 0
         record['ancestors'].each do |anc|
-          break if restrictions.length > 0 
+          break unless restrictions.empty?
+          next unless anc['_resolved']
           restrictions = AspaceCustomRestrictionsContextHelper.is_restricted?(anc['_resolved'])
         end
       end
@@ -94,7 +95,8 @@ class IndexerCommon
     hierarchy = {}
     if record['ancestors']
       record['ancestors'].reverse.each do |anc|
-        level = anc['level'].nil? ? anc['_resolved']['jsonmodel_type'].sub('_',' '): anc['level']
+        next unless anc['_resolved']
+        level = AspaceCustomRestrictionsContextHelper.record_level(anc['_resolved']).downcase
         display_string = anc['_resolved']['display_string']
         title = display_string.nil? || display_string.empty? ? anc['_resolved']['title'] : display_string
         hierarchy[level] = title
