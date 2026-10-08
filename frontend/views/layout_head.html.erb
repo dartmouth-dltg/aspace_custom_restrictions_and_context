@@ -71,7 +71,7 @@
     $().ready(() => {
       <% unless AppConfig.has_key?(:aspace_custom_restrictions_sui_search_enhance) && AppConfig[:aspace_custom_restrictions_sui_search_enhance] == false %>
         <% if search_page? || is_accession_idx? || is_digital_object_idx? || is_resource_idx? %>
-          const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>, `<%= raw ASUtils.to_json(custom_restrictions_object_data) %>`);
+          const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>, `<%= raw j(ASUtils.to_json(custom_restrictions_object_data)) %>`);
           objectDecorator.decorateSearchTypes();
         <% else %>
           const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);

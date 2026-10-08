@@ -1,15 +1,18 @@
 class AspaceCustomRestrictionsContextHelper
 
-  def self.use_accessrestrict?
-   AppConfig.has_key?(:aspace_custom_restrictions_use_accessrestrict) && AppConfig[:aspace_custom_restrictions_use_accessrestrict] == false ? false : true
+  # AppConfig[] raises on unset keys
+  def self.config(key, default = nil)
+    AppConfig.has_key?(key) ? AppConfig[key] : default
   end
 
+  def self.use_accessrestrict?
+    config(:aspace_custom_restrictions_use_accessrestrict) != false
+  end
+
+  # accepts both JSONModel hashes (jsonmodel_type) and solr docs (primary_type)
   def self.record_level(record)
     level = record['level'] == 'otherlevel' ? record['other_level'] : record['level']
-
-    if level.nil?
-      level = record['jsonmodel_type'].gsub('_', ' ').capitalize
-    end
+    level = (record['jsonmodel_type'] || record['primary_type']).to_s.tr('_', ' ').capitalize if level.nil? || level.empty?
 
     level
   end
@@ -27,24 +30,17 @@ class AspaceCustomRestrictionsContextHelper
     #    'subseries'
     #  ]
     # }
-    result_level = record_level(record).downcase
-    aos_for_res_type = AppConfig.has_key?(:aspace_custom_restriction_type_mapping) ? AppConfig[:aspace_custom_restriction_type_mapping] : nil
+    type_mapping = config(:aspace_custom_restriction_type_mapping)
+    return restrictions unless type_mapping.is_a?(Hash)
 
-    # check if we have a restriction type that only applies to certain levels
-    unless aos_for_res_type.nil?
-      restrictions.each do |restriction_level, restriction|
-        if aos_for_res_type.keys.include?(restriction)
-          aos_for_res_type.each do |restriction_type, ao_types|
-            unless ao_types.include?(result_level)
-              restrictions = {}
-            end
-          end
-        end
-      end
+    result_level = record_level(record).downcase
+
+    restrictions.each_value do |restriction|
+      levels = type_mapping[restriction]
+      return {} if levels && !levels.include?(result_level)
     end
 
     restrictions
-
   end
 
   def self.is_restricted?(record)
@@ -71,40 +67,23 @@ class AspaceCustomRestrictionsContextHelper
     restrictions
   end
 
+  # true if any accessrestrict note is not neutralised by a configured skip phrase
   def self.has_local_access_note?(notes_json)
-    has_local_access_restriction = false
-    notes_json.each do |note|
-      if note['type'] == 'accessrestrict'
-        has_local_access_restriction = true
-        if AppConfig.has_key?(:aspace_custom_restrictions_access_note_skip_phrases) && AppConfig[:aspace_custom_restrictions_access_note_skip_phrases].kind_of?(Array)
-          unless note['subnotes'].nil?
-            note['subnotes'].each do |subnote|
-              break unless has_local_access_restriction
-              AppConfig[:aspace_custom_restrictions_access_note_skip_phrases].each do |skip_phrase|
-                break unless has_local_access_restriction
-                unless subnote['content'].nil?
-                  if subnote['content'].downcase.include?(skip_phrase.downcase)
-                    has_local_access_restriction = false
-                  end
-                end
-              end
-            end
-          end
-        end
-      end
-    end
+    skip_phrases = config(:aspace_custom_restrictions_access_note_skip_phrases)
+    skip_phrases = [] unless skip_phrases.is_a?(Array)
 
-    has_local_access_restriction
-  end
-  
-  def self.check_for_subcontainers(instances)
-    has_sub_containers = false
-    instances.each do |inst|
-      if inst['sub_container']
-        has_sub_containers = true
+    notes_json.any? do |note|
+      next false unless note['type'] == 'accessrestrict'
+
+      (note['subnotes'] || []).none? do |subnote|
+        content = subnote['content']
+        !content.nil? && skip_phrases.any? {|phrase| content.downcase.include?(phrase.downcase)}
       end
     end
-    has_sub_containers
+  end
+
+  def self.check_for_subcontainers(instances)
+    (instances || []).any? {|inst| inst['sub_container']}
   end
 
   def self.parse_container_locations(container_locations)
@@ -127,13 +106,13 @@ class AspaceCustomRestrictionsContextHelper
 
   def self.parse_containers(instances)
     containers = []
-    instances.each do |inst|
+    (instances || []).each do |inst|
       if inst['sub_container'] && inst['sub_container']['top_container'] && inst['sub_container']['top_container']['_resolved']
         display_string = inst['sub_container']['top_container']['_resolved']['display_string']
         type = inst['sub_container']['top_container']['_resolved']['type']
 
         if type.nil?
-          display_string = "Container: " + display_string
+          display_string = "Container: #{display_string}"
         end
 
         locations = parse_container_locations(inst['sub_container']['top_container']['_resolved']['container_locations'])
@@ -172,18 +151,7 @@ class AspaceCustomRestrictionsContextHelper
   end
 
   def self.get_ao_location(record)
-    indicator_and_location = nil
-    if record['instances'].empty?
-      indicator_and_location = check_ancestor_instances(record)
-    else
-      if check_for_subcontainers(record['instances'])
-        indicator_and_location = parse_containers(record['instances'])
-      else
-        indicator_and_location = check_ancestor_instances(record)
-      end
-    end
-
-    indicator_and_location
+    get_location(record) || check_ancestor_instances(record)
   end
 
   def self.view_content(uri)

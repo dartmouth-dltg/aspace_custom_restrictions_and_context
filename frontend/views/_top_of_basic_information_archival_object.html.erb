@@ -19,7 +19,7 @@
       $().ready(() => {
         const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
         custom_restriction.displayMiniTreeToggle();
-        custom_restriction.addMiniTree(`<%= view_data %>`);
+        custom_restriction.addMiniTree(`<%= j view_data %>`);
       });
     </script>
   <% end %>

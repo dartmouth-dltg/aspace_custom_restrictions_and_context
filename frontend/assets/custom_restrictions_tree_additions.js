@@ -28,7 +28,7 @@ class CustomRestrictionsTree {
     const self = this;
 
     $.ajax({
-      url: '/plugins/aspace_custom_restrictions_and_context/mini_tree',
+      url: AS.app_prefix('/plugins/aspace_custom_restrictions_and_context/mini_tree'),
       data: {
         id: id,
         repo_id: self.repoId,

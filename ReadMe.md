@@ -5,6 +5,10 @@
 An ArchivesSpace plugin that enhances the staff and public interfaces with
 custom restrictions and additional contextual information.
 
+## Compatibility
+
+Code reviewed against the ArchivesSpace 4.2.1 APIs (not yet run on a live 4.2.1 instance).
+
 ## Installation
 
 Install as you normally would and add `aspace_custom_restrictions_and_context` to
@@ -155,3 +159,6 @@ cache issues.
 
 Plugin developed by Joshua Shaw [Joshua.D.Shaw@dartmouth.edu], Digital Library Technologies Group
 Dartmouth Library, Dartmouth College
+
+Partially authored with assistance from Claude (Anthropic), including the ArchivesSpace 4.2.1
+compatibility review and related fixes.

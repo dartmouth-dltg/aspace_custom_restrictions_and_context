@@ -47,32 +47,32 @@
   <% if is_search? || is_accession_idx? || is_digital_object_idx? || is_resource_idx? %>
   <script>
     $().ready(() => {
-      const puiSearchRestrictions = new CustomRestrictionsPui(`<%= raw ASUtils.to_json(custom_restrictions_object_data) %>`);
+      const puiSearchRestrictions = new CustomRestrictionsPui(`<%= raw j(ASUtils.to_json(custom_restrictions_object_data)) %>`);
       puiSearchRestrictions.setupDecoratePuiSearch();
       <% unless AppConfig.has_key?(:aspace_custom_restrictions_pui_tree) && AppConfig[:aspace_custom_restrictions_pui_tree] == false %>
         <% unless @result.nil? %>
           <% unless @result.repository_information.nil? %>
             if (typeof tree !== 'undefined' && typeof LargeTree !== 'undefined') {
               if (tree instanceof LargeTree) {
-                const customTree = new CustomRestrictionsTree(`<%= raw @result.repository_information.dig('top','uri') %>`, tree);
+                const customTree = new CustomRestrictionsTree(`<%= j @result.repository_information.dig('top','uri').to_s %>`, tree);
                 customTree.initialize();
               }
             }
             if (typeof scroll !== 'undefined' && typeof InfiniteScroll !== 'undefined') {
               if (scroll instanceof InfiniteScroll) {
-                const customInfiniteRecords = new CustomRestrictionsInfiniteScroll(`<%= raw @result.repository_information.dig('top','uri') %>`);
+                const customInfiniteRecords = new CustomRestrictionsInfiniteScroll(`<%= j @result.repository_information.dig('top','uri').to_s %>`);
                 customInfiniteRecords.initialize();
               }
             }
             if (typeof infiniteTree !== 'undefined' && typeof InfiniteTree !== 'undefined') {
               if (infiniteTree instanceof InfiniteTree) {
-                const customInfiniteTree = new CustomRestrictionsInfiniteTree(`<%= raw @result.repository_information.dig('top','uri') %>`);
+                const customInfiniteTree = new CustomRestrictionsInfiniteTree(`<%= j @result.repository_information.dig('top','uri').to_s %>`);
                 customInfiniteTree.initialize();
               }
             }
             if (typeof infiniteRecords !== 'undefined' && typeof InfiniteRecords !== 'undefined') {
               if (infiniteRecords instanceof InfiniteRecords) {
-                const customInfiniteRecords = new CustomRestrictionsInfiniteRecords(`<%= raw @result.repository_information.dig('top','uri') %>`);
+                const customInfiniteRecords = new CustomRestrictionsInfiniteRecords(`<%= j @result.repository_information.dig('top','uri').to_s %>`);
                 customInfiniteRecords.initialize();
               }
             }
