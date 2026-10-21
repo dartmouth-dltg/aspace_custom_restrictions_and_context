@@ -6,27 +6,16 @@ unless AppConfig.has_key?(:aspace_custom_restrictions_pui_enhance) && AppConfig[
 end
 
 require_relative '../lib/aspace_custom_restrictions_and_context_helper'
-require_relative '../lib/css_js_compile'
 
 Rails.application.config.after_initialize do
 
-  # aggregate css & js on each restart - assume it will mean some css or js changes to local files
-  plugin_directory = File.expand_path(File.dirname(__FILE__))
+  AppConfig[:aspace_custom_restrictions_pui_asset_version] =
+    AspaceCustomRestrictionsContextHelper.asset_version(File.join(File.dirname(__FILE__), "assets"))
 
-  css_files = Dir[File.join(plugin_directory,"assets","custom_restrictions_pui.css")]
-  js_files = Dir[
-      File.join(plugin_directory,"assets","custom_restrictions_pui.js"),
-      File.join(plugin_directory,"assets","custom_restrictions_tree_base.js"),
-      File.join(plugin_directory,"assets","custom_restrictions_tree_additions_pui.js"),
-      File.join(plugin_directory,"assets","custom_restrictions_infinite_tree.js"),
-      File.join(plugin_directory,"assets","custom_restrictions_infinite_records.js"),
-      File.join(plugin_directory,"assets","custom_restrictions_infinite_scroll.js")
-    ]
-  
-  AppConfig[:aspace_custom_restrictions_pui_assets_filename] = CssJsCompile.reaggregate_files(css_files, js_files, plugin_directory)
-
-  as_version_file = File.read(File.join(ASUtils.find_base_directory, 'ARCHIVESSPACE_VERSION'))
-  AppConfig[:custom_restrict_app_version] = as_version_file.gsub('v','').split('-')[0].to_f
+  # major.minor as a float for the tree js (note: a future 4.10 would read as 4.1).
+  # Unparseable versions (dev branch names, 'NO VERSION') assume the newest markup.
+  as_version = ASConstants.VERSION.to_s[/\d+\.\d+/]
+  AppConfig[:custom_restrict_app_version] = as_version ? as_version.to_f : 99.0
 
   ApplicationController.class_eval do
     helper_method :is_search?, :should_add_custom_restrictions?, :safe_json_script

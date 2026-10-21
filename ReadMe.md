@@ -151,10 +151,11 @@ single GET request per burst of nodes (up to 50 records per request), so you sho
 additional requests, but may still notice some performance impact depending on the resources
 available to your ArchivesSpace instance.
 
-### Asset Aggregation
+### Asset Cache Busting
 
-The css and javascript files are aggregated on startup for both the pui and staff interfaces to prevent
-cache issues.
+The css and javascript files for both the pui and staff interfaces are loaded with a query string
+derived from an MD5 hash of their contents (computed on startup), so browsers only fetch new copies
+when the files change.
 
 ## Credits
 

@@ -1,4 +1,14 @@
+require 'digest'
+
 class AspaceCustomRestrictionsContextHelper
+
+  # cache busting: version the plugin's css/js by content so the query string
+  # only changes when the files do (and is the same on every node)
+  def self.asset_version(assets_directory)
+    Digest::MD5.hexdigest(
+      Dir[File.join(assets_directory, "*.{css,js}")].sort.map {|f| File.read(f)}.join
+    )[0, 12]
+  end
 
   # AppConfig[] raises on unset keys
   def self.config(key, default = nil)

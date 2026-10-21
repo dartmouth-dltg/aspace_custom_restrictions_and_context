@@ -43,19 +43,9 @@ class CustomRestrictionsAndContext {
   addMiniTree(data, displayContext = this.displayContext) {
     const hasContext = $(data).find('#mini-tree-context').length > 0;
     const hasLocation = $(data).find('.mini-tree-location').length > 0
-    if (hasContext === false) {
-      $(this.miniTreeLoaderSelector).replaceWith(AS.renderTemplate("template_custom_restrictions_location_only"));
-    }
-    if (hasLocation === false) {
-      $(this.miniTreeLoaderSelector).replaceWith(AS.renderTemplate("template_custom_restrictions_context_only"));
-    }
-    if (hasLocation === false && hasContext == false) {
-      $(this.miniTreeLoaderSelector).remove();
-    } else {
-      if (displayContext) {
-        this.displayMiniTreeToggle();
-        $(this.miniTreeLoaderSelector).attr('aria-expanded', 'true');
-      }
+    if (displayContext && (hasContext || hasLocation)) {
+      this.displayMiniTreeToggle(hasContext, hasLocation);
+      $(this.miniTreeLoaderSelector).attr('aria-expanded', 'true');
     }
     $(this.basicInformation).before(data);
     this.moveRestrictionsLabel();
@@ -82,10 +72,16 @@ class CustomRestrictionsAndContext {
     });
   }
 
-  displayMiniTreeToggle() {
+  displayMiniTreeToggle(hasContext = true, hasLocation = true) {
     const self = this;
 
-    const miniTreeLoader = AS.renderTemplate("template_custom_restrictions_context_and_location");
+    let template = "template_custom_restrictions_context_and_location";
+    if (!hasContext) {
+      template = "template_custom_restrictions_location_only";
+    } else if (!hasLocation) {
+      template = "template_custom_restrictions_context_only";
+    }
+    const miniTreeLoader = AS.renderTemplate(template);
     $(this.objectTitleSelector).after(miniTreeLoader);
 
     $(this.miniTreeLoaderSelector).on('click', (evt) => {
@@ -95,10 +91,15 @@ class CustomRestrictionsAndContext {
   }
 
   initializeMiniTree() {
+    const dataEl = $(`#${this.miniTreeDataSelector}`);
+    // inline partial script and the infinite tree pane handler can both reach here
+    if (dataEl.length === 0 || dataEl.data('initialized')) {
+      return;
+    }
+    dataEl.data('initialized', true);
+
     const displayContext = $(`#${this.displayContextSelector}`).data('value');
-    const miniTreeData = $(`#${this.miniTreeDataSelector}`).html();
-    
-    this.addMiniTree(miniTreeData, displayContext);
+    this.addMiniTree(dataEl.html(), displayContext);
   }
 
   displaySearchEnhancements(id, target) {

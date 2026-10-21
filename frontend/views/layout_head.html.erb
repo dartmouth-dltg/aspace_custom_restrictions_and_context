@@ -1,9 +1,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=expand_less,expand_more,location_on,subdirectory_arrow_right,toc,warning" />
-<%#= stylesheet_link_tag "#{AppConfig[:frontend_proxy_prefix]}assets/#{AppConfig[:aspace_custom_restrictions_sui_assets_filename]}.css" %>
-<%#= javascript_include_tag "#{AppConfig[:frontend_proxy_prefix]}assets/#{AppConfig[:aspace_custom_restrictions_sui_assets_filename]}.js" %>
-<%= stylesheet_link_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.css" %>
-<%= javascript_include_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.js" %>
-<%= javascript_include_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_tree_additions.js" %>
+<%= stylesheet_link_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.css?v=#{AppConfig[:aspace_custom_restrictions_sui_asset_version]}" %>
+<%= javascript_include_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.js?v=#{AppConfig[:aspace_custom_restrictions_sui_asset_version]}" %>
+<%= javascript_include_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_tree_additions.js?v=#{AppConfig[:aspace_custom_restrictions_sui_asset_version]}" %>
 
 <% unless AppConfig.has_key?(:aspace_custom_restrictions_sui_search_enhance) && AppConfig[:aspace_custom_restrictions_sui_search_enhance] == false %>
   <%
@@ -75,29 +73,12 @@
         }
       <% end %>
     });
-    $(document).on('loadedrecordform.aspace', (evt, param) => {
-      customRestrictWaitForElement('#infinite-tree-record-pane.initialised').then(() => {
-        customRestriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`);
-        customRestriction.initializeMiniTree();
-      });
+    // 4.2+ infinite tree fills its record pane via innerHTML (inline scripts don't run),
+    // then fires this event with the pane as the container
+    $(document).on('loadedrecordform.aspace', (evt, $container) => {
+      if ($container && $($container).is('#infinite-tree-record-pane')) {
+        new CustomRestrictionsAndContext(`<%= current_repo.id %>`).initializeMiniTree();
+      }
     });
-
-    function customRestrictWaitForElement(selector) {
-      return new Promise((resolve) => {
-        const observer = new MutationObserver((mutations, observer) => {
-          const element = document.querySelector(selector);
-          if (element) {
-            observer.disconnect();
-            resolve(element);
-          }
-        });
-
-        observer.observe(document.body, {
-          childList: true,
-          subtree: true,
-        });
-      });
-    }
-
   </script>
 <% end %>

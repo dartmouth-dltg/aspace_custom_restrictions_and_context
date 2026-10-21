@@ -5,7 +5,6 @@ class CustomRestrictionsInfiniteTree extends CustomRestrictionsTreeBase {
   }
 
   fullConfig() {
-    console.log(this.appVersion)
     let rootNodeSelector = 'root-row';
     let decoratorSelector = 'a.record-title';
     let nodeSelectorClass = 'largetree-node';
@@ -17,7 +16,7 @@ class CustomRestrictionsInfiniteTree extends CustomRestrictionsTreeBase {
     const infiniteTreeCfg = {
       infiniteTree: true,
       treeSelector: 'tree-container',
-      nodeSelectorClass: 'node',
+      nodeSelectorClass: nodeSelectorClass,
       rootNodeSelector: rootNodeSelector,
       decoratorNodeSelector: decoratorSelector,
       uriSelector: 'data-uri',
