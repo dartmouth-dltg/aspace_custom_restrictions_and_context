@@ -9,19 +9,21 @@ class IndexerCommon
     'top_container::container_locations'
   ]
   @custom_restriction_resolves.each {|attr| add_attribute_to_resolve(attr)}
-  AppConfig[:record_inheritance_resolves] |= @custom_restriction_resolves
 
   add_indexer_initialize_hook do |indexer|
-    indexer.add_document_prepare_hook {|doc, record|
+    # PUIIndexer's own prepare hook deletes record['record']['ancestors'] and plugin
+    # hooks normally run after it, so go first or every AO costs a backend GET
+    indexer.instance_variable_get(:@document_prepare_hooks).unshift(proc {|doc, record|
       doc['custom_restrictions_u_sbool'] = nil
       record_data = record['record']
+      restrictions = nil
       case doc['primary_type']
-      when 'accession'
+      when 'accession', 'resource'
         location = AspaceCustomRestrictionsContextHelper.get_location(record_data)
         unless location.nil? || location.empty?
           doc['custom_restrictions_locations_u_sstr'] = ASUtils.to_json(location)
         end
-        doc['custom_restrictions_u_sstr'] = ASUtils.to_json(toplevel_restriction(record_data))
+        restrictions = toplevel_restriction(record_data)
       when 'archival_object'
         record_data = check_ancestors_are_resolved(record)
         location = AspaceCustomRestrictionsContextHelper.get_ao_location(record_data)
@@ -29,46 +31,26 @@ class IndexerCommon
           doc['custom_restrictions_locations_u_sstr'] = ASUtils.to_json(location)
         end
         doc['custom_restrictions_context_u_sstr'] = ASUtils.to_json(extract_hierarchy(record_data))
-        doc['custom_restrictions_u_sstr'] = ASUtils.to_json(get_restrictions(record_data))
+        restrictions = get_restrictions(record_data)
       when 'digital_object'
-        doc['custom_restrictions_u_sstr'] = ASUtils.to_json(toplevel_restriction(record_data))
+        restrictions = toplevel_restriction(record_data)
       when 'digital_object_component'
         record_data = check_ancestors_are_resolved(record)
         doc['custom_restrictions_context_u_sstr'] = ASUtils.to_json(extract_hierarchy(record_data))
-        doc['custom_restrictions_u_sstr'] = ASUtils.to_json(get_restrictions(record_data))
-      when 'resource'
-        location = AspaceCustomRestrictionsContextHelper.get_location(record_data)
-        unless location.nil? || location.empty?
-          doc['custom_restrictions_locations_u_sstr'] = ASUtils.to_json(location)
-        end
-        doc['custom_restrictions_u_sstr'] = ASUtils.to_json(toplevel_restriction(record_data))
+        restrictions = get_restrictions(record_data)
       end
-      if doc['custom_restrictions_u_sstr'] && ASUtils.json_parse(doc['custom_restrictions_u_sstr']).length > 0
-        doc['custom_restrictions_u_sbool'] = true
+      if restrictions
+        doc['custom_restrictions_u_sstr'] = ASUtils.to_json(restrictions)
+        doc['custom_restrictions_u_sbool'] = true unless restrictions.empty?
       end
-    }
+    })
   end
 
-  # do we really need to be this paranoid?
+  # fall back to fetching the record if ancestors somehow arrived unresolved
   def self.check_ancestors_are_resolved(record)
-    record_data = record['record']
+    ancestors = record['record']['ancestors']
+    return record['record'] unless ancestors.nil? || ancestors.any? {|anc| anc['_resolved'].nil?}
 
-    if record_data['ancestors'].nil?
-      record_data = resolve_ancestors(record)
-    else
-      record_data['ancestors'].each do |anc|
-        if anc['_resolved'].nil?
-          record_data = resolve_ancestors(record)
-          break
-        end
-      end
-    end
-
-    record_data
-
-  end
-
-  def self.resolve_ancestors(record)
     JSONModel::HTTP.get_json(record['uri'], 'resolve[]' => @custom_restriction_resolves)
   end
 
