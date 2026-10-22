@@ -11,9 +11,7 @@ class IndexerCommon
   @custom_restriction_resolves.each {|attr| add_attribute_to_resolve(attr)}
 
   add_indexer_initialize_hook do |indexer|
-    # PUIIndexer's own prepare hook deletes record['record']['ancestors'] and plugin
-    # hooks normally run after it, so go first or every AO costs a backend GET
-    indexer.instance_variable_get(:@document_prepare_hooks).unshift(proc {|doc, record|
+    hook = proc {|doc, record|
       doc['custom_restrictions_u_sbool'] = nil
       record_data = record['record']
       restrictions = nil
@@ -43,7 +41,16 @@ class IndexerCommon
         doc['custom_restrictions_u_sstr'] = ASUtils.to_json(restrictions)
         doc['custom_restrictions_u_sbool'] = true unless restrictions.empty?
       end
-    })
+    }
+
+    # PUIIndexer's own prepare hook deletes record['record']['ancestors']. Before
+    # final_doc_rules (archivesspace #3667) it ran ahead of plugin hooks, so go
+    # first there or every AO costs a backend GET
+    if indexer.respond_to?(:final_doc_rules, true)
+      indexer.add_document_prepare_hook(&hook)
+    else
+      indexer.instance_variable_get(:@document_prepare_hooks).unshift(hook)
+    end
   end
 
   # fall back to fetching the record if ancestors somehow arrived unresolved
