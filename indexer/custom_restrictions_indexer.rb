@@ -10,6 +10,38 @@ class IndexerCommon
   ]
   @custom_restriction_resolves.each {|attr| add_attribute_to_resolve(attr)}
 
+  # Core builds each staff document's json from the whole record, so with
+  # ancestors resolved every archival object and component would store a full
+  # copy of each ancestor (with its containers and locations). The hooks read
+  # ancestors from the record, so drop the resolved copies from the json once they
+  # have all run. Other plugins that do the same check the shared flag, so the json
+  # is only rewritten once. (The PUI indexer removes ancestors from its own documents.)
+  def self.custom_restrictions_strip_resolved_ancestors(doc, record)
+    return if record['resolved_ancestors_stripped'] || doc['json'].nil?
+    return unless Array(record['record']['ancestors']).any? {|anc| anc.is_a?(Hash) && anc['_resolved'] }
+
+    json = ASUtils.json_parse(doc['json'])
+    Array(json['ancestors']).each {|anc| anc.delete('_resolved') if anc.is_a?(Hash) }
+    doc['json'] = ASUtils.to_json(json)
+    record['resolved_ancestors_stripped'] = true
+  end
+
+  # final_doc_rules (archivesspace #3667) runs after all plugin hooks. Only add it
+  # where core has it: the hook ordering below checks for it to detect older releases
+  CUSTOM_RESTRICTIONS_CORE_FINAL_DOC_RULES = Object.private_method_defined?(:final_doc_rules) || method_defined?(:final_doc_rules)
+
+  if CUSTOM_RESTRICTIONS_CORE_FINAL_DOC_RULES
+    module CustomRestrictionsStripResolvedAncestors
+      def final_doc_rules
+        super
+        unless defined?(PUIIndexer) && is_a?(PUIIndexer)
+          add_document_prepare_hook {|doc, record| IndexerCommon.custom_restrictions_strip_resolved_ancestors(doc, record) }
+        end
+      end
+    end
+    prepend CustomRestrictionsStripResolvedAncestors
+  end
+
   add_indexer_initialize_hook do |indexer|
     hook = proc {|doc, record|
       doc['custom_restrictions_u_sbool'] = nil
@@ -50,6 +82,11 @@ class IndexerCommon
       indexer.add_document_prepare_hook(&hook)
     else
       indexer.instance_variable_get(:@document_prepare_hooks).unshift(hook)
+    end
+
+    # older releases: strip after this plugin's hooks instead (see above)
+    unless CUSTOM_RESTRICTIONS_CORE_FINAL_DOC_RULES || (defined?(PUIIndexer) && indexer.is_a?(PUIIndexer))
+      indexer.add_document_prepare_hook {|doc, record| IndexerCommon.custom_restrictions_strip_resolved_ancestors(doc, record) }
     end
   end
 
