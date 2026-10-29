@@ -1,98 +1,81 @@
-require 'aspace_logger'
 class CustomRestrictionsController < ApplicationController
 
-  #skip_before_filter :unauthorised_access
-  set_access_control  "view_repository" => [:mini_tree]
+  set_access_control  "view_repository" => [:mini_tree, :restrictions]
+
+  ALLOWED_TYPES = [
+    'accessions',
+    'archival_objects',
+    'digital_objects',
+    'digital_object_components',
+    'resources'
+  ]
+
+  MAX_BATCH = 100
 
   def mini_tree
-    id = params[:id]
-    repo_id = params[:repo_id]
     record_type = params[:type]
-    allowed_types = [
-      'accessions',
-      'archival_objects',
-      'digital_objects',
-      'digital_object_components',
-      'resources'
-    ]
-    return unless allowed_types.include?(record_type)
 
-    resolve = ['top_container', 'top_container::container_locations', 'ancestors', 'ancestors::instances::top_container', 'ancestors::instances::top_container::container_locations', 'digital_object']
-    uri = '/repositories/' + repo_id + '/' + record_type + '/' + id
-    @tree = ''
-    @location = ''
-    @restrictions = {}
+    return head :bad_request unless ALLOWED_TYPES.include?(record_type) && params[:id].to_s =~ /\A\d+\z/
 
-    unless id.empty?
-      record = JSONModel::HTTP.get_json(uri, 'resolve[]' => resolve)
-      unless record.nil?
-        case record_type
-        when 'accessions'
-          @location = AspaceCustomRestrictionsContextHelper.get_location(record)
-          @restrictions = toplevel_restriction(record)
-        when 'archival_objects'
-          @location = AspaceCustomRestrictionsContextHelper.get_ao_location(record)
-          @tree = extract_hierarchy(record)
-          @restrictions = get_restrictions(record)
-        when 'digital_objects'
-          @restrictions = toplevel_restriction(record)
-        when 'digital_object_components'
-          @tree = extract_hierarchy(record)
-          @restrictions = get_digital_object_component_restrictions(record)
-        when 'resources'
-          @location = AspaceCustomRestrictionsContextHelper.get_location(record)
-          @restrictions = toplevel_restriction(record)
-        end
+    uri = "/repositories/#{session[:repo_id]}/#{record_type}/#{params[:id]}"
+    search_params = {"filter_term[]" => [{"uri" => uri}.to_json], "q" => "*", "resolve[]" => ["ancestors:id@custom_restrictions_compact_resource"]}
+    record = Search.all(session[:repo_id], search_params)["results"].first
+
+    return head :not_found if record.nil?
+
+    @tree = []
+    @location = []
+    @restrictions = applicable_restrictions(record)
+
+    unless record['custom_restrictions_context_u_sstr'].nil?
+      @tree = record['custom_restrictions_context_u_sstr'].reject(&:empty?).map {|ctx| ASUtils.json_parse(ctx)}.first || []
+    end
+    unless record['custom_restrictions_locations_u_sstr'].nil?
+      record['custom_restrictions_locations_u_sstr'].each do |loc|
+        next if loc.nil? || loc.empty?
+        @location << ASUtils.json_parse(loc).fetch(0)
       end
     end
 
-    @restrictions = AspaceCustomRestrictionsContextHelper.restriction_applies_to_object?(record, @restrictions)
-    
     render_aspace_partial :partial => "mini_tree/context"
+  end
+
+  # batch lookup of restriction labels for tree nodes
+  # params[:uris] => ['/repositories/2/archival_objects/1', ...]
+  # returns { uri => [label, ...] }
+  def restrictions
+    uri_pattern = %r{\A/repositories/#{session[:repo_id].to_i}/(#{ALLOWED_TYPES.join('|')})/\d+\z}
+    uris = Array(params[:uris]).map(&:to_s).select {|uri| uri =~ uri_pattern}.uniq.first(MAX_BATCH)
+
+    return render(:json => {}) if uris.empty?
+
+    query = {
+      'query' => {
+        'jsonmodel_type' => 'boolean_query',
+        'op' => 'OR',
+        'subqueries' => uris.map {|uri| {'jsonmodel_type' => 'field_query', 'field' => 'uri', 'value' => uri, 'literal' => true}}
+      }
+    }
+    results = Search.all(session[:repo_id], {'aq' => ASUtils.to_json(query), 'page_size' => uris.length})['results']
+
+    labels = {}
+    results.each do |record|
+      labels[record['uri']] = applicable_restrictions(record).map do |level, restriction|
+        I18n.t('custom_restrictions_and_context.restriction_label',
+               :level => level.titleize,
+               :restriction => I18n.t('enumerations.custom_restriction_type.' + restriction, default: I18n.t('enumerations.custom_restriction_type.default')))
+      end
+    end
+
+    render :json => ASUtils.to_json(labels)
   end
 
   private
 
-  def get_digital_object_component_restrictions(record)
-    restrictions = AspaceCustomRestrictionsContextHelper.is_restricted?(record)
-    if restrictions.empty?
-      restrictions = AspaceCustomRestrictionsContextHelper.is_restricted?(record['digital_object']['_resolved'])
-    end
-
-    restrictions
-  end
-
-  def get_restrictions(record)
-    restrictions = AspaceCustomRestrictionsContextHelper.is_restricted?(record)
-    
-    if restrictions.empty?
-      if record['ancestors'] && record['ancestors'].length > 0
-        record['ancestors'].each do |anc|
-          break if restrictions.length > 0 
-          restrictions = AspaceCustomRestrictionsContextHelper.is_restricted?(anc['_resolved'])
-        end
-      end
-    end
-
-    restrictions
-  end
-
-  def toplevel_restriction(record)
-    AspaceCustomRestrictionsContextHelper.is_restricted?(record)
-  end
-
-  def extract_hierarchy(record)
-    hierarchy = {}
-    if record['ancestors']
-      record['ancestors'].reverse.each do |anc|
-        level = anc['level'].nil? ? anc['_resolved']['jsonmodel_type'].sub('_',' '): anc['level']
-        display_string = anc['_resolved']['display_string']
-        title = display_string.nil? || display_string.empty? ? anc['_resolved']['title'] : display_string
-        hierarchy[level] = title
-      end
-    end
-
-    hierarchy
+  # {level => restriction_type} filtered by any configured type to level mapping
+  def applicable_restrictions(record)
+    restrictions = record['custom_restrictions_u_sstr'].nil? ? {} : ASUtils.json_parse(record['custom_restrictions_u_sstr'].fetch(0))
+    AspaceCustomRestrictionsContextHelper.restriction_applies_to_object?(record, restrictions)
   end
 
 end

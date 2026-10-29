@@ -2,14 +2,12 @@
 
 <% unless @restrictions.blank? %>
   <% @restrictions.each do |level, restriction| %>
-    <div id="custom-restriction" class="label label-danger">
+    <div id="custom-restriction" class="label bg-danger badge">
       <span>
         <%= 
           I18n.t('custom_restrictions_and_context.restriction_label', 
-            {
-              :level => level.titleize,
-              :restriction => I18n.t('enumerations.custom_restriction_type.' + restriction, I18n.t('enumerations.custom_restriction_type.default'))
-            }
+              level: level.titleize,
+              restriction: I18n.t('enumerations.custom_restriction_type.' + restriction, default: I18n.t('enumerations.custom_restriction_type.default'))
           )
         %>
       </span>
@@ -32,7 +30,7 @@
             <div class="mini-tree-location">
               <div>
                 <div class="mini-tree-indicator">
-                  <%= loc['type'].nil? ? 'Container' : loc['type'].capitalize %> <%= loc['indicator']%>
+                  <%= loc['display_string']%>
                 </div>
                 <div class="mini-tree-locations">
                   <% loc['locations'].each do |place| %>

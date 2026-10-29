@@ -1,9 +1,13 @@
-# WIP: Custom Restrictions and Context
+# Aspace Custom Restrictions and Context
 
 ## About
 
 An ArchivesSpace plugin that enhances the staff and public interfaces with
 custom restrictions and additional contextual information.
+
+## Compatibility
+
+Code reviewed against the ArchivesSpace 4.2.1 APIs (not yet run on a live 4.2.1 instance).
 
 ## Installation
 
@@ -15,6 +19,11 @@ database.
 
 The plugin does not have any additional dependencies so you do not need to run
 the `initialize-plugin` script.
+
+### Reindex Required
+
+A soft reindex is required. See the ArchivesSpace 
+[Tech Docs](https://archivesspace.github.io/tech-docs/administration/indexes.html).
 
 ## Configuration
 
@@ -65,10 +74,23 @@ AppConfig[:aspace_custom_restrictions_access_note_skip_phrases] = [
 ```
 You can have multiple skip phrases in the configuration option.
 
-You can also completely turn off the use of Conditions Governing Access notes in the restriction
-calculation.
+Conditions Governing Access notes are not used in the restriction calculation unless you
+turn them on.
 ```
-AppConfig[:aspace_custom_restrictions_use_accessrestrict] = false
+AppConfig[:aspace_custom_restrictions_use_accessrestrict] = true
+```
+
+Tree decoration is also optional. You can choose to turn these off to conserve server resources.
+```
+AppConfig[:aspace_custom_restrictions_staff_tree] = false
+```
+and
+```
+AppConfig[:aspace_custom_restrictions_pui_tree] = false
+```
+Staff faceting is alos optional and defaults to off. To turn it on, set
+```
+AppConfig[:aspace_custom_restrictions_faceting] = true
 ```
 
 ## Enhancements
@@ -87,8 +109,8 @@ which allows an editor to tag an object with more nuance than just the stock
 `Restrictions Apply?` checkbox. However, if that checkbox had been ticked, the plugin
 will also use that data.
 
-The plugin parses the custom restriction data, any Conditions Governing Access notes,
-and the `Restrictions Apply?` data and displays a warning on the object that the restriction
+The plugin parses the custom restriction data, any Conditions Governing Access notes
+(if enabled), and the `Restrictions Apply?` data and displays a warning on the object that the restriction
 has been applied. It also displays the restriction text on all of its descendants. The
 language displayed depends on the custom restriction selected or 
 provides a default. See `frontend/locales/enums` for values supplied by the plugin. This is
@@ -105,10 +127,14 @@ of the archival object, resource, or accession if a container instance is attach
 are both displayed on the view mode of an archival object, while the location is only displayed in search results.
 Digital object components will also be enhanced with an additional context tree in view mode.
 
+Finally, unless configured otherwise, the trees for resources and digital objects are decorated with warnings for objects in the tree
+that have a restriction.
+
 ### PUI
 
 The plugin adds a restriction note to the search & browse results and the object view similarly to the way it
-enhances the staff interface.
+enhances the staff interface. Unless configured otherwise, trees for resources and digital objects are also 
+decorated with warnings for objects in the tree that have a restriction.
 
 ## Enumerations
 
@@ -117,13 +143,24 @@ list, make sure that you also add translations in `frontend/locales/enums`.
 
 ## Note
 
+### Performance
+
 In order to make this plugin useful for multiple versions of ArchivesSpace and to limit maintenance of
-multiple versions, the plugin uses javascript to enhance the layouts and makes one additional request per object.
-For views of a single object this is one additional request, but for search results this will increase the
-number of requests by the default page size. Depending on the resources available to your ArchivesSpace instance,
-you may notice some performance impacts.
+multiple versions, the plugin uses javascript to enhance the tree layouts. Tree node lookups are batched into a
+single GET request per burst of nodes (up to 50 records per request), so you should see few
+additional requests, but may still notice some performance impact depending on the resources
+available to your ArchivesSpace instance.
+
+### Asset Cache Busting
+
+The css and javascript files for both the pui and staff interfaces are loaded with a query string
+derived from an MD5 hash of their contents (computed on startup), so browsers only fetch new copies
+when the files change.
 
 ## Credits
 
 Plugin developed by Joshua Shaw [Joshua.D.Shaw@dartmouth.edu], Digital Library Technologies Group
 Dartmouth Library, Dartmouth College
+
+Partially authored with assistance from Claude (Anthropic), including the ArchivesSpace 4.2.1
+compatibility review and related fixes.

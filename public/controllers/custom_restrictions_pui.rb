@@ -1,86 +1,58 @@
 class CustomRestrictionsPuiController < ApplicationController
 
-  skip_before_action  :verify_authenticity_token
+  ALLOWED_TYPES = [
+    'accessions',
+    'archival_objects',
+    'digital_objects',
+    'digital_object_components',
+    'resources'
+  ]
 
+  MAX_BATCH = 100
+
+  # batch lookup of restriction labels for tree nodes
+  # params[:uris] => ['/repositories/2/archival_objects/1', ...]
+  # returns { uri => label } where label is '' if there is no restriction
   def custom_pui_restrictions
-    record_type = params[:type]
-    uri = params[:uri]
+    uri_pattern = %r{\A/repositories/\d+/(#{ALLOWED_TYPES.join('|')})/\d+\z}
 
-    allowed_types = [
-      'accessions',
-      'archival_objects',
-      'digital_objects',
-      'digital_object_components',
-      'resources'
-    ]
-    resolve = ['ancestors:id']
-
-    if allowed_types.include?(record_type)
-
-      begin
-        record = ArchivesSpaceClient.instance.get_record(uri, 'resolve[]' => resolve)
-      rescue
-        record = false
-      end
-
-      if record
-
-        case record_type
-        when 'accessions'
-          restrictions = toplevel_restriction(record.raw)
-        when 'archival_objects'
-          restrictions = get_restrictions(record.raw)
-        when 'digital_objects'
-          restrictions = toplevel_restriction(record.raw)
-        when 'digital_object_components'
-          restrictions = get_restrictions(record.raw)
-        when 'resources'
-          restrictions = toplevel_restriction(record.raw)
-        end
-
-        restrictions = AspaceCustomRestrictionsContextHelper.restriction_applies_to_object?(ASUtils.json_parse(record.raw['json']), restrictions)
-
-        # restrictions is in form {level => restriction_type}
-        if restrictions.empty?
-          render :json => {}
-        else
-          begin
-            restriction_message = I18n.t('enumerations.custom_restriction_type.' + restrictions.values.first, :raise => I18n::MissingTranslationData)
-          rescue I18n::MissingTranslationData
-            restriction_message = I18n.t('enumerations.custom_restriction_type.default')
-          end
-          render :json => ASUtils.to_json(restriction_message)
-        end
-
-      else
-        render :json => {}
-      end
-
-    else
-      render :json => {}
+    # tolerate a trailing fragment (e.g. #pui) but key the response by what was sent
+    requested = Array(params[:uris]).map(&:to_s).uniq.first(MAX_BATCH)
+    lookup = requested.each_with_object({}) do |uri, h|
+      bare = uri.sub(/#.*\z/, '')
+      h[uri] = bare if bare =~ uri_pattern
     end
+
+    return render(:json => {}) if lookup.empty?
+
+    records = begin
+      ArchivesSpaceClient.instance.search_records(lookup.values.uniq, 'page_size' => lookup.size).raw.fetch('results', [])
+    rescue StandardError => e
+      Rails.logger.error("custom restrictions: search failed: #{e.message}")
+      []
+    end
+    records_by_uri = records.each_with_object({}) {|record, h| h[record['uri']] = record}
+
+    labels = lookup.each_with_object({}) do |(uri, bare), h|
+      h[uri] = restriction_label(records_by_uri[bare])
+    end
+
+    render :json => ASUtils.to_json(labels)
   end
 
   private
 
-  def get_restrictions(record)
-    restrictions = AspaceCustomRestrictionsContextHelper.is_restricted?(ASUtils.json_parse(record['json']))
-    if restrictions.empty?
-      if record['_resolved_ancestors'] && record['_resolved_ancestors'].length > 0
-        # uggghhh! resolved ancestors are stored as a hash....ugly
-        record['_resolved_ancestors'].to_a.reverse.to_h.each do |anc|
-          break if restrictions.length > 0 
-          # resolved ancestors are in form [uri, [record]]
-          restrictions = AspaceCustomRestrictionsContextHelper.is_restricted?(ASUtils.json_parse(anc.last.first['json']))
-        end
-      end
-    end
+  def restriction_label(record)
+    return '' if record.nil?
 
-    restrictions
-  end
+    restrictions = record['custom_restrictions_u_sstr'].nil? ? {} : ASUtils.json_parse(record['custom_restrictions_u_sstr'].fetch(0))
+    restrictions = AspaceCustomRestrictionsContextHelper.restriction_applies_to_object?(record, restrictions)
+    return '' if restrictions.empty?
 
-  def toplevel_restriction(record)
-    AspaceCustomRestrictionsContextHelper.is_restricted?(ASUtils.json_parse(record['json']))
+    I18n.t('custom_restrictions_and_context.restriction_label',
+           level: restrictions.keys.first.titleize,
+           restriction: I18n.t('enumerations.custom_restriction_type.' + restrictions.values.first,
+                               default: I18n.t('enumerations.custom_restriction_type.default')))
   end
 
 end

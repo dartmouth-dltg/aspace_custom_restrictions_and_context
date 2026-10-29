@@ -1,58 +1,76 @@
+function onPageLoad(callback) {
+  let fired = false;
+  const guard = () => {
+    if (fired) return;
+    fired = true;
+    callback();
+  };
+  $(document).on('turbolinks:load', guard);
+  $(document).ready(guard);
+}
+
+function initializeTree() {
+  const repoDataEl = document.getElementById('custom-restrictions-repo-data');
+
+  if (!repoDataEl) return;
+
+  const { repo_uri, app_version } = JSON.parse(repoDataEl.textContent);
+
+  if (typeof tree !== 'undefined' && typeof LargeTree !== 'undefined' && tree instanceof LargeTree) {
+    new CustomRestrictionsTree(repo_uri, app_version).initialize();
+  }
+
+  if (typeof scroll !== 'undefined' && typeof InfiniteScroll !== 'undefined' && scroll instanceof InfiniteScroll) {
+    new CustomRestrictionsInfiniteScroll(repo_uri, app_version).initialize();
+  }
+
+  if (typeof infiniteTree !== 'undefined' && typeof InfiniteTree !== 'undefined' && infiniteTree instanceof InfiniteTree) {
+    new CustomRestrictionsInfiniteTree(repo_uri, app_version).initialize();
+  }
+
+  if (typeof infiniteRecords !== 'undefined' && typeof InfiniteRecords !== 'undefined' && infiniteRecords instanceof InfiniteRecords) {
+    new CustomRestrictionsInfiniteRecords(repo_uri, app_version).initialize();
+  }
+}
+    
 class CustomRestrictionsPui {
-  constructor() {
+  constructor(searchData) {
+    this.searchData = searchData;
     this.searchResultsSelector = '.search-results';
     this.objectHeadingSelector = '#content h1';
-    this.objectTypes = ['accessions', 'archival_objects', 'digital_objects', 'digital_object_components', 'resources'];
   }
 
   puiRestrictionTemplate(data) {
-    return `<span class="aspace-custom-restrictions label label-danger">${data}</span>`;
+    return `<span class="aspace-custom-restrictions label bg-danger badge">${data}</span>`;
   }
 
-  fetchSearchJson(dataUri, type, target, objectDisplay = false) {
+  decoratePuiSearch(target, dataUri) {
+    if (!dataUri) {
+      return;
+    }
     const self = this;
-    $.ajax({
-      url: '/aspace_custom_restrictions_and_context/pui_restrictions',
-      data: {
-        uri: dataUri,
-        type: type,
-      },
-      method: 'post',
-    }).done((data) => {
-      if (data.length > 1) {
-        if (objectDisplay) {
-          target.append(self.puiRestrictionTemplate(data));
-        } else {
-          target.after(self.puiRestrictionTemplate(data));
-        }
-      }
-    }).fail(() => {
-      console.log('Data fetch failed for Custom Restrictions and Context plugin.');
-    });
+
+    // archival objects have an extra fragment
+    if (dataUri.includes('archival_object')) {
+      dataUri += '#pui'
+    }
+    if (this.searchData[dataUri] && this.searchData[dataUri]['custom_restrictions'].length > 0) {
+      target.after(self.puiRestrictionTemplate(this.searchData[dataUri]['custom_restrictions']))
+    }
   }
   
   setupDecoratePuiSearch() {
     const self = this;
     $(this.searchResultsSelector).find('.recordrow').each(function iteratePuiResults() {
+      const target = $(this).find('.record-title');
       const dataUri = $(this).attr('data-uri');
-      if (dataUri.length) {
-        const target = $(this).find('.record-title');
-        const type = dataUri.split("/").slice(-2, -1).join("_");
-        if (self.objectTypes.includes(type)) {
-          self.fetchSearchJson(dataUri, type, target);
-        }
-      }
+      self.decoratePuiSearch(target, dataUri);
     });
   }
 
-  setupObjectRestrictionDisplay(uri, primary_type) {
+  objectRestrictionDisplay(restriction) {
     const self = this;
-    const type = `${primary_type}s`;
-    if (uri.length) {
-      const target = $(self.objectHeadingSelector);
-      if (self.objectTypes.includes(type)) {
-        self.fetchSearchJson(uri, type, target, true);
-      }
-    }
+    const target = $(self.objectHeadingSelector);
+    target.append(self.puiRestrictionTemplate(restriction))
   }
 }

@@ -1,5 +1,6 @@
 class CustomRestrictionsAndContext {
-  constructor(repo_id, displayContext = true) {
+  constructor(repo_id, displayContext = true, searchData = null) {
+    this.searchRestrictionsData = searchData;
     this.miniTreeLoaderSelector = '#custom-restriction-mini-tree-loader';
     this.objectTitleSelector = '.record-pane h2';
     this.auditDisplaySelector = 'div[class*="audit-display"]';
@@ -10,21 +11,12 @@ class CustomRestrictionsAndContext {
     this.repo_id = repo_id;
     this.displayContext = displayContext;
     this.objectTypes = ['accessions', 'archival_objects', 'digital_objects', 'digital_object_components', 'resources'];
-  }
-
-  waitForEl(selector, callback) {
-    const self = this;
-    if ($(selector).length) {
-      callback();
-    } else {
-      setTimeout(() => {
-        self.waitForEl(selector, callback);
-      }, 100);
-    }
+    this.displayContextSelector = 'custom-restrictions-display-context';
+    this.miniTreeDataSelector = 'custom-restrictions-view-data';
   }
 
   restrictionTypeSnippet(restrictionType) {
-    return `<div id="custom-restriction" class="label label-danger">${restrictionType}</div>`;
+    return `<div id="custom-restriction" class="label bg-danger badge">${restrictionType}</div>`;
   }
 
   displayRestriction(restrictionType) {
@@ -48,24 +40,15 @@ class CustomRestrictionsAndContext {
     $(this.objectTitleSelector).append($(this.restrictionsId));
   }
 
-  addMiniTree(data) {
+  addMiniTree(data, displayContext = this.displayContext) {
     const hasContext = $(data).find('#mini-tree-context').length > 0;
     const hasLocation = $(data).find('.mini-tree-location').length > 0
-    if (hasContext === false) {
-      $(this.miniTreeLoaderSelector).replaceWith(AS.renderTemplate("template_custom_restrictions_location_only"));
-    }
-    if (hasLocation === false) {
-      $(this.miniTreeLoaderSelector).replaceWith(AS.renderTemplate("template_custom_restrictions_context_only"));
-    }
-    if (hasLocation === false && hasContext == false) {
-      $(this.miniTreeLoaderSelector).remove();
+    if (displayContext && (hasContext || hasLocation)) {
+      this.displayMiniTreeToggle(hasContext, hasLocation);
+      $(this.miniTreeLoaderSelector).attr('aria-expanded', 'true');
     }
     $(this.basicInformation).before(data);
     this.moveRestrictionsLabel();
-
-    if (this.displayContext) {
-      $(this.miniTreeLoaderSelector).attr('aria-expanded', 'true');
-    }
   }
 
   removeMiniTreeToggle() {
@@ -75,13 +58,13 @@ class CustomRestrictionsAndContext {
   fetchObjectJson(id, recordType = 'archival_objects') {
     const self = this;
     $.ajax({
-      url: '/plugins/aspace_custom_restrictions_and_context/mini_tree',
+      url: AS.app_prefix('/plugins/aspace_custom_restrictions_and_context/mini_tree'),
       data: {
         id: id,
         repo_id: self.repo_id,
         type: recordType,
       },
-      method: 'post',
+      method: 'get',
     }).done((data) => {
       self.addMiniTree(data);
     }).fail(() => {
@@ -89,35 +72,49 @@ class CustomRestrictionsAndContext {
     });
   }
 
-  displayMiniTreeToggle() {
+  displayMiniTreeToggle(hasContext = true, hasLocation = true) {
     const self = this;
 
-    if (this.displayContext) {
-      const miniTreeLoader = AS.renderTemplate("template_custom_restrictions_context_and_location");
-      $(this.objectTitleSelector).after(miniTreeLoader);
-
-      $('body').on('click', this.miniTreeLoaderSelector, (evt) => {
-        evt.preventDefault();
-        self.toggleMiniTree();
-      })
+    let template = "template_custom_restrictions_context_and_location";
+    if (!hasContext) {
+      template = "template_custom_restrictions_location_only";
+    } else if (!hasLocation) {
+      template = "template_custom_restrictions_context_only";
     }
+    const miniTreeLoader = AS.renderTemplate(template);
+    $(this.objectTitleSelector).after(miniTreeLoader);
+
+    $(this.miniTreeLoaderSelector).on('click', (evt) => {
+      evt.preventDefault();
+      self.toggleMiniTree();
+    })
   }
 
-  fetchSearchJson(id, target, recordType) {
+  initializeMiniTree() {
+    const dataEl = $(`#${this.miniTreeDataSelector}`);
+    // inline partial script and the infinite tree pane handler can both reach here
+    if (dataEl.length === 0 || dataEl.data('initialized')) {
+      return;
+    }
+    dataEl.data('initialized', true);
+
+    const displayContext = $(`#${this.displayContextSelector}`).data('value');
+    this.addMiniTree(dataEl.html(), displayContext);
+  }
+
+  displaySearchEnhancements(id, target) {
     const self = this;
-    $.ajax({
-      url: '/plugins/aspace_custom_restrictions_and_context/mini_tree',
-      data: {
-        id: id,
-        repo_id: self.repo_id,
-        type: recordType,
-      },
-      method: 'post',
-    }).done((data) => {
-      target.append(data);
-    }).fail(() => {
-      console.log('Search enhancements failed for Custom Restrictions and Context plugin.')
+    const restrictionData = JSON.parse(this.searchRestrictionsData)[`${id}`];
+
+    if (typeof restrictionData === 'undefined') {
+      return;
+    }
+    const crTemplate = AS.renderTemplate("template_custom_restrictions_search_enhance", {
+      restrictions: restrictionData['custom_restrictions'],
+      locations: restrictionData['custom_locations']
     });
+
+    target.append(crTemplate);
   }
 
   decorateSearchTypes() {
@@ -126,10 +123,10 @@ class CustomRestrictionsAndContext {
       if ($(this).children('td.table-record-actions').length > 0) {
         let isActionable = false
         let recordType = null;
-        const editUrl = $(this).children('td.table-record-actions').find('a[href*="resolve/edit"]').attr('href');
-        if (typeof editUrl !== "undefined") {
+        const viewUrl = $(this).children('td.table-record-actions').find('a[href*="resolve/readonly"]').attr('href');
+        if (typeof viewUrl !== "undefined") {
           self.objectTypes.forEach((type) => {
-            if (editUrl.includes(type)) {
+            if (viewUrl.includes(type)) {
               isActionable = true;
               recordType = type;
             }
@@ -137,8 +134,9 @@ class CustomRestrictionsAndContext {
         }
 
         if (isActionable) {
-          const elemId = decodeURIComponent(decodeURIComponent(editUrl).split('/').slice(-1).toString());
-          self.fetchSearchJson(elemId, $(this).find('td.col.title'), recordType);
+          const target = $(this).children('td.title');
+          const elemId = new URLSearchParams(viewUrl.split('?').slice(-1).join('')).get('uri');
+          self.displaySearchEnhancements(elemId, target);
         }
       }
     });

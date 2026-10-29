@@ -4,18 +4,11 @@ require_relative '../lib/aspace_custom_restrictions_and_context_helper'
 
 Rails.application.config.after_initialize do
 
-  ActionView::PartialRenderer.class_eval do
-    alias_method :render_custom_restrictions, :render
-    def render(context, options, block)
-      result = render_custom_restrictions(context, options, block);
-
-      # Add our location-specific templates to shared/templates
-      if options[:partial] == "shared/templates"
-        result += render(context, options.merge(:partial => "js_templates/templates"), nil)
-      end
-
-      result
-    end
+  if AspaceCustomRestrictionsContextHelper.config(:aspace_custom_restrictions_faceting)
+    Plugins::add_search_base_facets('custom_restrictions_u_sbool')
   end
+
+  AppConfig[:aspace_custom_restrictions_sui_asset_version] =
+    AspaceCustomRestrictionsContextHelper.asset_version(File.join(File.dirname(__FILE__), "assets"))
 
 end

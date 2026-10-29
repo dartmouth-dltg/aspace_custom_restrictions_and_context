@@ -1,6 +1,7 @@
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-<%= stylesheet_link_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.css" %>
-<%= javascript_include_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.js" %>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=expand_less,expand_more,location_on,subdirectory_arrow_right,toc,warning" />
+<%= stylesheet_link_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.css?v=#{AppConfig[:aspace_custom_restrictions_sui_asset_version]}" %>
+<%= javascript_include_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_context.js?v=#{AppConfig[:aspace_custom_restrictions_sui_asset_version]}" %>
+<%= javascript_include_tag "#{AppConfig[:frontend_proxy_prefix]}assets/custom_restrictions_tree_additions.js?v=#{AppConfig[:aspace_custom_restrictions_sui_asset_version]}" %>
 
 <% unless AppConfig.has_key?(:aspace_custom_restrictions_sui_search_enhance) && AppConfig[:aspace_custom_restrictions_sui_search_enhance] == false %>
   <%
@@ -12,32 +13,72 @@
       display_context = false
     end
 
-    def search_page?
-      controller.controller_name == "search"
+    ctrl = controller.controller_name
+    decorate_search = ctrl == 'search' ||
+      (%w[resources accessions digital_objects].include?(ctrl) && controller.action_name == 'index')
+
+    custom_restrictions_object_data = {}
+
+    unless @search_data.nil?
+      @search_data['results'].each do |result|
+        unless result['custom_restrictions_u_sstr'].nil?
+          restrictions = []
+          locations = []
+
+          raw_restrictions = result['custom_restrictions_u_sstr'].nil? ? {} : ASUtils.json_parse(result['custom_restrictions_u_sstr'].first)
+          raw_restrictions.each do |level, restriction|
+            restrictions << I18n.t('custom_restrictions_and_context.restriction_label', 
+                              level: level.titleize,
+                              restriction: I18n.t('enumerations.custom_restriction_type.' + restriction, default: I18n.t('enumerations.custom_restriction_type.default'))
+                            )
+          end
+
+          raw_locations = result['custom_restrictions_locations_u_sstr'].nil? ? {} : ASUtils.json_parse(result['custom_restrictions_locations_u_sstr'].first)
+          raw_locations.each do |loc|
+            places = []
+            loc['locations'].each do |place|
+              places << place
+            end
+            locations << {
+              'display_string' => loc['display_string'],
+              'places' => places
+            }
+          end
+          
+          custom_restrictions_object_data[result['id']] = {
+            'custom_restrictions' => restrictions,
+            'custom_locations' => locations
+          }
+        end
+      end
     end
+  end
+%>
 
-    def is_resource_idx? 
-      controller.controller_name == "resources" && controller.action_name == "index"
-    end
-
-    def is_accession_idx? 
-      controller.controller_name == "accessions" && controller.action_name == "index"
-    end
-
-    def is_digital_object_idx? 
-      controller.controller_name == "digital_objects" && controller.action_name == "index"
-    end
-
-  %>
-
-  <% unless current_repo.nil? %>
-    <script>
-      const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
-      $().ready(() => {
-        <% if search_page? || is_accession_idx? || is_digital_object_idx? || is_resource_idx? %>
+<% unless current_repo.nil? %>
+  <script>
+    $().ready(() => {
+      <% unless AppConfig.has_key?(:aspace_custom_restrictions_sui_search_enhance) && AppConfig[:aspace_custom_restrictions_sui_search_enhance] == false %>
+        <% if decorate_search %>
+          const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>, `<%= raw j(ASUtils.to_json(custom_restrictions_object_data)) %>`);
           objectDecorator.decorateSearchTypes();
+        <% else %>
+          const objectDecorator = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
         <% end %>
-      });
-    </script>
-  <% end %>
+      <% end %>
+      <% unless AppConfig.has_key?(:aspace_custom_restrictions_staff_tree) && AppConfig[:aspace_custom_restrictions_staff_tree] == false %>
+        if (typeof tree !== 'undefined' || typeof infiniteTree !== 'undefined') {
+          const customTree = new CustomRestrictionsTree(`<%= current_repo.id %>`);
+          customTree.initialize();
+        }
+      <% end %>
+    });
+    // 4.2+ infinite tree fills its record pane via innerHTML (inline scripts don't run),
+    // then fires this event with the pane as the container
+    $(document).on('loadedrecordform.aspace', (evt, $container) => {
+      if ($container && $($container).is('#infinite-tree-record-pane')) {
+        new CustomRestrictionsAndContext(`<%= current_repo.id %>`).initializeMiniTree();
+      }
+    });
+  </script>
 <% end %>

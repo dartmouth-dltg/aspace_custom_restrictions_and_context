@@ -5,13 +5,29 @@
       if AppConfig.has_key?(:aspace_custom_restrictions_show_context) && AppConfig[:aspace_custom_restrictions_show_context] == false 
         display_context = false
       end
+
+      restriction, location, tree = AspaceCustomRestrictionsContextHelper.view_content(@archival_object['uri'])
+
+      view_data = render(:partial => 'mini_tree/context', :locals => {
+        :@restrictions => restriction,
+        :@tree => tree,
+        :@location => location
+      })
     %>
+    <div id="custom-restrictions-display-context" data-value="<%= display_context %>"></div>
+    <div id="custom-restrictions-view-data" class="visually-hidden" aria-hidden="true"><%= view_data %></div>
+  
+    <!-- 
+      Infinite tree loads this using innerHTML which blocks all script execution.
+      So we can safely use this AND the infinite tree initializer in layout_head
+      without fear of conflict or double initialization.
+    -->
     <script>
       $().ready(() => {
-        const custom_restriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
-        custom_restriction.displayMiniTreeToggle();
-        custom_restriction.fetchObjectJson(`<%= @archival_object.id %>`, 'archival_objects');
+        const customRestriction = new CustomRestrictionsAndContext(`<%= current_repo.id %>`, <%= display_context %>);
+        customRestriction.initializeMiniTree();
       });
     </script>
   <% end %>
 <% end %>
+
