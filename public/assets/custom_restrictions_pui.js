@@ -16,15 +16,8 @@ function initializeTree() {
 
   const { repo_uri, app_version } = JSON.parse(repoDataEl.textContent);
 
-  if (typeof tree !== 'undefined' && typeof LargeTree !== 'undefined' && tree instanceof LargeTree) {
-    new CustomRestrictionsTree(repo_uri, app_version).initialize();
-  }
-
-  if (typeof scroll !== 'undefined' && typeof InfiniteScroll !== 'undefined' && scroll instanceof InfiniteScroll) {
-    new CustomRestrictionsInfiniteScroll(repo_uri, app_version).initialize();
-  }
-
-  if (typeof infiniteTree !== 'undefined' && typeof InfiniteTree !== 'undefined' && infiniteTree instanceof InfiniteTree) {
+  // show pages boot InfiniteTree without keeping a global, so detect it by its container
+  if (typeof InfiniteTree !== 'undefined' && document.querySelector('.infinite-tree-container')) {
     new CustomRestrictionsInfiniteTree(repo_uri, app_version).initialize();
   }
 

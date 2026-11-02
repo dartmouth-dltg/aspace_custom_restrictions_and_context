@@ -67,14 +67,14 @@
         <% end %>
       <% end %>
       <% unless AppConfig.has_key?(:aspace_custom_restrictions_staff_tree) && AppConfig[:aspace_custom_restrictions_staff_tree] == false %>
-        if (typeof tree !== 'undefined' || typeof infiniteTree !== 'undefined') {
+        if (typeof infiniteTree !== 'undefined') {
           const customTree = new CustomRestrictionsTree(`<%= current_repo.id %>`);
           customTree.initialize();
         }
       <% end %>
     });
-    // 4.2+ infinite tree fills its record pane via innerHTML (inline scripts don't run),
-    // then fires this event with the pane as the container
+    // the infinite tree record pane fires this event with the pane as the container
+    // (initializeMiniTree is guarded, so it is safe alongside the inline initializer)
     $(document).on('loadedrecordform.aspace', (evt, $container) => {
       if ($container && $($container).is('#infinite-tree-record-pane')) {
         new CustomRestrictionsAndContext(`<%= current_repo.id %>`).initializeMiniTree();

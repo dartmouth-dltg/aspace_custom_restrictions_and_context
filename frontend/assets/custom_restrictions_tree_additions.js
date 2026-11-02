@@ -50,7 +50,6 @@ class CustomRestrictionsTree {
 
   constructor(repoId) {
     this.repoId = repoId;
-    this.treeSelector = 'tree-container';
     this.infiniteTreeSelector = 'infinite-tree-container';
     this.nodeSelector = 'a.record-title';
     this.batcher = new CustomRestrictionsBatcher(AS.app_prefix('/plugins/aspace_custom_restrictions_and_context/restrictions'));
@@ -129,14 +128,13 @@ class CustomRestrictionsTree {
     const manipTree = (mutationList, observer) => {
       self.observeTree(mutationList);
     }
-    const stdTree = document.getElementById(this.treeSelector);
     const infiniteTree = document.getElementById(this.infiniteTreeSelector);
 
-    const observer = new MutationObserver(manipTree);
-    if (stdTree !== null) {
-      observer.observe(document.getElementById(this.treeSelector), this.mutationConfig);
-    } else if (infiniteTree !== null) {
-      observer.observe(document.getElementById(this.infiniteTreeSelector), this.mutationConfig);
+    if (infiniteTree !== null) {
+      const observer = new MutationObserver(manipTree);
+      observer.observe(infiniteTree, this.mutationConfig);
+      // nodes may have rendered before the observer attached
+      this.prepareNodes($(infiniteTree).find(this.nodeSelector));
     }
   }
 }

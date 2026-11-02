@@ -116,7 +116,7 @@ class CustomRestrictionsTreeBase {
 
     self.batcher.request(dataUri, (data) => {
       if (self.cfg.infiniteTree || self.cfg.isInfiniteRecord) {
-        el = el.find(self.cfg.decoratorNodeSelector);
+        el = el.find(self.cfg.decoratorNodeSelector).first();
       }
       self.decorateTreeObject(data || '', el);
     });

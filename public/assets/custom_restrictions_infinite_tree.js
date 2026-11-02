@@ -23,8 +23,12 @@ class CustomRestrictionsInfiniteTree extends CustomRestrictionsTreeBase {
     };
 
     const cfg = this.baseConfig();
-    if (document.getElementById(infiniteTreeCfg.treeSelector) === null) {
-      infiniteTreeCfg.treeSelector = 'infinite-tree-container';
+    // 5.0: show pages mount a record-linked tree (id 'record-tree-container') and keep no
+    // global; the infinite view uses #infinite-tree-container. Find it by class.
+    const container = document.querySelector('.infinite-tree-container');
+    if (container) {
+      if (!container.id) container.id = 'custom-restrictions-tree-container';
+      infiniteTreeCfg.treeSelector = container.id;
     }
 
     return {...cfg, ...infiniteTreeCfg};
