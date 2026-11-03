@@ -60,8 +60,11 @@ class CustomRestrictionsTree {
     };
   }
 
+  // An empty icon whose accessible name is the restriction: screen readers announce it as part of the
+  // title link, while the link's textContent (read by core's tree move menu and drag-and-drop labels)
+  // stays the plain title.
   puiTreeWarning(data) {
-    return `<span class="custom-restriction-visual-identifier" aria-hidden="true" title="${data}"></span><span class="custom-restrictions-visually-hidden">${data}</span>`
+    return $('<span class="custom-restriction-visual-identifier" role="img"></span>').attr({ 'aria-label': data, title: data });
   }
 
   decorateTreeObject(data, el) {
